@@ -9,6 +9,7 @@ int main() {
 	al_init();
 	al_init_font_addon();
 	al_init_primitives_addon();
+	al_install_keyboard();
 
 	ALLEGRO_DISPLAY* display = al_create_display(1280, 720);
 	al_set_window_position(display, 200, 200);
@@ -20,6 +21,12 @@ int main() {
 	al_register_event_source(evento, al_get_timer_event_source(fps));
 	al_start_timer(fps);
 
+	float personagem_x = 400 - 16;
+	float personagem_y = 300 - 24;
+	float personagem_largura = 32;
+	float personagem_altura = 48;
+	float velocidade = 3;
+
 	bool rodando = true;
 	bool redesenhando = true;
 
@@ -28,6 +35,19 @@ int main() {
 		al_wait_for_event(evento, &ev);
 
 		if (ev.type == ALLEGRO_EVENT_TIMER) {
+			ALLEGRO_KEYBOARD_STATE teclado;
+			al_get_keyboard_state(&teclado);
+
+			if (al_key_down(&teclado, ALLEGRO_KEY_RIGHT)) personagem_x += velocidade;
+			if (al_key_down(&teclado, ALLEGRO_KEY_LEFT)) personagem_x -= velocidade;
+			if (al_key_down(&teclado, ALLEGRO_KEY_UP)) personagem_y -= velocidade;
+			if (al_key_down(&teclado, ALLEGRO_KEY_DOWN)) personagem_y += velocidade;
+
+			if (personagem_x < 0) personagem_x = 0;
+			if (personagem_y < 0) personagem_y = 0;
+			if (personagem_x + personagem_largura > 800) personagem_x = 800 - personagem_largura;
+			if (personagem_y + personagem_altura > 600) personagem_y = 600 - personagem_altura;
+
 			redesenhando = true;
 		}
 		else if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
@@ -40,8 +60,7 @@ int main() {
 			al_clear_to_color(al_map_rgb(0, 0, 0));
 
 
-			al_draw_filled_rectangle(0, 0, 10, 10, al_map_rgb(255, 0, 0));
-			al_draw_rectangle(20, 20, 50, 50, al_map_rgb(255, 255, 255), 2);
+			al_draw_filled_rectangle(personagem_x, personagem_y, personagem_x + personagem_largura, personagem_y + personagem_altura, al_map_rgb(80, 160, 220));
 
 			al_flip_display();
 		}
