@@ -20,7 +20,7 @@ enum { DIR_BAIXO = 0, DIR_CIMA = 1, DIR_ESQUERDA = 2, DIR_DIREITA = 3 };
 
 int mapa[LINHAS][COLUNAS] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
-    {1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
+    {1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1},
     {1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1},
     {1,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1},
     {1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,2,1,0,1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,1},
@@ -91,6 +91,60 @@ void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, 
     }
 }
 
+bool pode_andar(float x, float y)
+{
+    int esquerda = (int)x / TILE_SIZE;
+    int direita = (int)(x + CELL_W - 1) / TILE_SIZE;
+    int cima = (int)y / TILE_SIZE;
+    int baixo = (int)(y + CELL_H - 1) / TILE_SIZE;
+
+    if (esquerda < 0 || direita >= COLUNAS ||
+        cima < 0 || baixo >= LINHAS)
+    {
+        return false;
+    }
+
+    if (mapa[cima][esquerda] == PAREDE ||
+        mapa[cima][direita] == PAREDE ||
+        mapa[baixo][esquerda] == PAREDE ||
+        mapa[baixo][direita] == PAREDE)
+    {
+        return false;
+    }
+
+    if (mapa[cima][esquerda] == PORTA_FECHADA ||
+        mapa[cima][direita] == PORTA_FECHADA ||
+        mapa[baixo][esquerda] == PORTA_FECHADA ||
+        mapa[baixo][direita] == PORTA_FECHADA)
+    {
+        return false;
+    }
+
+    return true;
+}
+
+void abrir_porta(float personagem_x, float personagem_y)
+{
+    int coluna = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
+    int linha = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
+
+    for (int i = linha - 1; i <= linha + 1; i++)
+    {
+      for (int j = coluna - 1; j <= coluna + 1; j++)
+       {
+            if (i >= 0 && i < LINHAS &&
+                j >= 0 && j < COLUNAS)
+            {
+              if (mapa[i][j] == PORTA_FECHADA)
+                {
+                    mapa[i][j] = CHAO;
+                    return;
+              }
+          }
+   }
+ }
+}
+
 int main()
 {
     al_init();
@@ -126,6 +180,7 @@ int main()
 
     al_register_event_source(evento, al_get_display_event_source(display));
     al_register_event_source(evento, al_get_timer_event_source(fps));
+    al_register_event_source(evento, al_get_keyboard_event_source());
 
     al_start_timer(fps);
 
@@ -154,45 +209,51 @@ int main()
 
             andando = false;
 
+            float novo_x = personagem_x;
+            float novo_y = personagem_y;
+
             if (al_key_down(&teclado, ALLEGRO_KEY_RIGHT))
             {
-                personagem_x += velocidade;
+                novo_x += velocidade;
                 direcao = DIR_DIREITA;
                 andando = true;
             }
 
             if (al_key_down(&teclado, ALLEGRO_KEY_LEFT))
             {
-                personagem_x -= velocidade;
+                novo_x -= velocidade;
                 direcao = DIR_ESQUERDA;
                 andando = true;
             }
 
+            if (pode_andar(novo_x, personagem_y))
+            {
+                personagem_x = novo_x;
+            }
+
             if (al_key_down(&teclado, ALLEGRO_KEY_UP))
             {
-                personagem_y -= velocidade;
+                novo_y -= velocidade;
                 direcao = DIR_CIMA;
                 andando = true;
             }
 
             if (al_key_down(&teclado, ALLEGRO_KEY_DOWN))
             {
-                personagem_y += velocidade;
+                novo_y += velocidade;
                 direcao = DIR_BAIXO;
                 andando = true;
             }
 
-            if (personagem_x < 0)
-                personagem_x = 0;
+            if (pode_andar(personagem_x, novo_y))
+            {
+                personagem_y = novo_y;
+            }
 
-            if (personagem_y < 0)
-                personagem_y = 0;
-
-            if (personagem_x + CELL_W > COLUNAS * TILE_SIZE)
-                personagem_x = COLUNAS * TILE_SIZE - CELL_W;
-
-            if (personagem_y + CELL_H > LINHAS * TILE_SIZE)
-                personagem_y = LINHAS * TILE_SIZE - CELL_H;
+            if (al_key_down(&teclado, ALLEGRO_KEY_E))
+            {
+                abrir_porta(personagem_x, personagem_y);
+            }
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
             camera_y = personagem_y + CELL_H / 2 - 720 / 2;
