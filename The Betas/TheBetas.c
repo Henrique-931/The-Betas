@@ -130,19 +130,19 @@ void abrir_porta(float personagem_x, float personagem_y)
 
     for (int i = linha - 1; i <= linha + 1; i++)
     {
-      for (int j = coluna - 1; j <= coluna + 1; j++)
-       {
+        for (int j = coluna - 1; j <= coluna + 1; j++)
+        {
             if (i >= 0 && i < LINHAS &&
                 j >= 0 && j < COLUNAS)
             {
-              if (mapa[i][j] == PORTA_FECHADA)
+                if (mapa[i][j] == PORTA_FECHADA)
                 {
                     mapa[i][j] = CHAO;
                     return;
-              }
-          }
-   }
- }
+                }
+            }
+        }
+    }
 }
 
 int main()
@@ -193,6 +193,7 @@ int main()
     bool andando = false;
     bool rodando = true;
     bool redesenhando = true;
+    bool perguntando = false;
 
     float camera_x = 0;
     float camera_y = 0;
@@ -212,47 +213,50 @@ int main()
             float novo_x = personagem_x;
             float novo_y = personagem_y;
 
-            if (al_key_down(&teclado, ALLEGRO_KEY_RIGHT))
+            if (!perguntando)
             {
-                novo_x += velocidade;
-                direcao = DIR_DIREITA;
-                andando = true;
-            }
+                if (al_key_down(&teclado, ALLEGRO_KEY_RIGHT))
+                {
+                    novo_x += velocidade;
+                    direcao = DIR_DIREITA;
+                    andando = true;
+                }
 
-            if (al_key_down(&teclado, ALLEGRO_KEY_LEFT))
-            {
-                novo_x -= velocidade;
-                direcao = DIR_ESQUERDA;
-                andando = true;
-            }
+                if (al_key_down(&teclado, ALLEGRO_KEY_LEFT))
+                {
+                    novo_x -= velocidade;
+                    direcao = DIR_ESQUERDA;
+                    andando = true;
+                }
 
-            if (pode_andar(novo_x, personagem_y))
-            {
-                personagem_x = novo_x;
-            }
+                if (pode_andar(novo_x, personagem_y))
+                {
+                    personagem_x = novo_x;
+                }
 
-            if (al_key_down(&teclado, ALLEGRO_KEY_UP))
-            {
-                novo_y -= velocidade;
-                direcao = DIR_CIMA;
-                andando = true;
-            }
+                if (al_key_down(&teclado, ALLEGRO_KEY_UP))
+                {
+                    novo_y -= velocidade;
+                    direcao = DIR_CIMA;
+                    andando = true;
+                }
 
-            if (al_key_down(&teclado, ALLEGRO_KEY_DOWN))
-            {
-                novo_y += velocidade;
-                direcao = DIR_BAIXO;
-                andando = true;
-            }
+                if (al_key_down(&teclado, ALLEGRO_KEY_DOWN))
+                {
+                    novo_y += velocidade;
+                    direcao = DIR_BAIXO;
+                    andando = true;
+                }
 
-            if (pode_andar(personagem_x, novo_y))
-            {
-                personagem_y = novo_y;
-            }
+                if (pode_andar(personagem_x, novo_y))
+                {
+                    personagem_y = novo_y;
+                }
 
-            if (al_key_down(&teclado, ALLEGRO_KEY_E))
-            {
-                abrir_porta(personagem_x, personagem_y);
+                if (al_key_down(&teclado, ALLEGRO_KEY_E))
+                {
+                    perguntando = true;
+                }
             }
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
@@ -296,6 +300,33 @@ int main()
                 CELL_H,
                 0
             );
+
+            if (perguntando)
+            {
+                al_draw_filled_rectangle(
+                    0, 0, 1280, 720, al_map_rgba(0, 0, 0, 180));
+
+                al_draw_filled_rectangle(
+                    300, 150, 980, 570, al_map_rgb(35, 35, 45));
+                    
+                al_draw_rectangle(
+                    300, 150, 980, 570, al_map_rgb(220, 220, 220), 2);
+
+                al_draw_text(
+                    fonte, al_map_rgb(255, 255, 255), 640, 190, ALLEGRO_ALIGN_CENTER, "PORTA BLOQUEADA");
+
+                al_draw_text(
+                    fonte, al_map_rgb(255, 255, 255), 640, 290, ALLEGRO_ALIGN_CENTER, "EXEMPLO");
+
+                al_draw_rectangle(
+                    500, 370, 780, 420, al_map_rgb(180, 180, 180), 2);
+
+                al_draw_text(
+                    fonte, al_map_rgb(180, 180, 180), 640, 385, ALLEGRO_ALIGN_CENTER, "RESPOSTA");
+
+                al_draw_text(
+                    fonte, al_map_rgb(200, 200, 200), 640, 500, ALLEGRO_ALIGN_CENTER, "ENTER = CONFIRMAR");
+            }
 
             al_flip_display();
         }
