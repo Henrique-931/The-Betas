@@ -12,13 +12,10 @@
 #define TILE_SIZE 60
 #define LINHAS 25
 #define COLUNAS 35
-
 #define CHAO 0
 #define PAREDE 1
 #define PORTA_FECHADA 2
-
 #define QTD_PERGUNTAS 7
-
 #define PROF_COLUNAS 7
 #define PROF_LINHAS 4
 #define QTD_FALAS 9
@@ -39,8 +36,7 @@ Pergunta perguntas[QTD_PERGUNTAS] = {
     {"x/2 + x/3 = 15", 18},
     {"4(2x - 3) = 3(x + 6) - 5", 5},
     {"7x - 4 = 2x - 24", -4},
-    {"(2x - 1)/3 = (x + 4)/2", 14}
-};
+    {"(2x - 1)/3 = (x + 4)/2", 14}};
 
 char falas[QTD_FALAS][200] = {
     "Ola, aluno! Eu sou o Professor. Fique por perto: vou te ensinar o basico para abrir as portas deste labirinto.",
@@ -51,8 +47,7 @@ char falas[QTD_FALAS][200] = {
     "Exemplo 2: 3x - 4 = 11. Passo o 4 somando: 3x = 15. O 3 multiplica, entao passa dividindo: x = 15 / 3 = 5.",
     "Com x dos dois lados, junte os x de um lado e os numeros do outro. Ex: 5x - 3 = 2x + 9 -> 3x = 12 -> x = 4.",
     "Com parenteses, multiplique primeiro: 3(x - 2) = 3x - 6. Com fracoes, multiplique tudo pelo denominador comum.",
-    "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!"
-};
+    "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!"};
 
 int mapa[LINHAS][COLUNAS] = {
     {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -90,26 +85,18 @@ void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, 
         {
             float x = j * TILE_SIZE - camera_x;
             float y = i * TILE_SIZE - camera_y;
-
             if (mapa[i][j] == PAREDE)
             {
-                al_draw_scaled_bitmap(
-                    tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), x, y, TILE_SIZE, TILE_SIZE, 0);
+                al_draw_scaled_bitmap(tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), x, y, TILE_SIZE, TILE_SIZE, 0);    
             }
             else if (mapa[i][j] == PORTA_FECHADA)
             {
-                al_draw_scaled_bitmap(
-                    tile_porta, 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+                al_draw_scaled_bitmap( tile_porta, 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
             }
             else
             {
-                al_draw_filled_rectangle(
-                    x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180));
-            }
-        }
-    }
-}
-
+                al_draw_filled_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180)); }}}}
+    
 bool pode_andar(float x, float y)
 {
     int esquerda = (int)x / TILE_SIZE;
@@ -153,7 +140,6 @@ void abrir_porta(int linha, int coluna)
         }
     }
 }
-
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
 {
     return (mx >= x1 && mx <= x2 && my >= y1 && my <= y2);
@@ -240,33 +226,26 @@ int main()
     float personagem_x = 80;
     float personagem_y = 60;
     float velocidade = 3;
-
     int direcao = DIR_BAIXO;
-
     bool andando = false;
     bool rodando = true;
     bool redesenhando = true;
     bool perguntando = false;
-
     char resposta[20] = "";
     int tamanho_resposta = 0;
     int pergunta_atual = 0;
     char mensagem[50] = "";
-
     int porta_linha = -1;
     int porta_coluna = -1;
-
     float camera_x = 0;
     float camera_y = 0;
-
     bool conversando = false;
     int pagina_fala = 0;
     int contador_anim = 0;
-
     bool caderno_aberto = false;
     int pagina_caderno = 0;
     int falas_lidas = 0;
-
+    
     while (rodando)
     {
         ALLEGRO_EVENT ev;
@@ -278,10 +257,8 @@ int main()
             {
                 perguntando = false;
                 resposta[0] = '\0';
-                tamanho_resposta = 0;
-            }
-        }
-
+                tamanho_resposta = 0; }}
+            
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
         {
             if (ev.keyboard.keycode == ALLEGRO_KEY_N && conversando == false)
@@ -296,10 +273,8 @@ int main()
                     pagina_caderno = falas_lidas - 1;
 
                     if (pagina_caderno < 0)
-                        pagina_caderno = 0;
-                }
-            }
-
+                        pagina_caderno = 0;}}
+                
             if (caderno_aberto)
             {
                 if (ev.keyboard.keycode == ALLEGRO_KEY_LEFT && pagina_caderno > 0)
@@ -309,9 +284,7 @@ int main()
                     pagina_caderno++;
 
                 if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
-                    caderno_aberto = false;
-            }
-        }
+                    caderno_aberto = false;}}
 
 
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN && !perguntando && tem_professor && !caderno_aberto)
@@ -331,9 +304,7 @@ int main()
                     pagina_fala++;
 
                     if (pagina_fala >= QTD_FALAS)
-                        conversando = false;
-                }
-            }
+                        conversando = false;}}
 
             if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
                 conversando = false;
@@ -382,11 +353,7 @@ int main()
                                 resposta[tamanho_resposta] = '0';
 
                             tamanho_resposta++;
-                            resposta[tamanho_resposta] = '\0';
-                        }
-                    }
-                }
-            }
+                            resposta[tamanho_resposta] = '\0';}}}}
 
             if (clicou(mx, my, 640, 290, 900, 350))
             {
@@ -486,13 +453,7 @@ int main()
 
                                     resposta[0] = '\0';
                                     tamanho_resposta = 0;
-                                    mensagem[0] = '\0';
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+                                    mensagem[0] = '\0';}}}}}}
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
             camera_y = personagem_y + CELL_H / 2 - 720 / 2;
@@ -549,27 +510,21 @@ int main()
                         quadro_coluna = 1;
                 }
 
-                al_draw_scaled_bitmap(
-                    prof_sprites, quadro_coluna * prof_quadro_w, quadro_linha * prof_quadro_h, prof_quadro_w, prof_quadro_h, professor_x - camera_x, professor_y - camera_y, prof_w, prof_h, 0);
+                al_draw_scaled_bitmap(prof_sprites, quadro_coluna * prof_quadro_w, quadro_linha * prof_quadro_h, prof_quadro_w, prof_quadro_h, professor_x - camera_x, professor_y - camera_y, prof_w, prof_h, 0);
 
                 if (!conversando && perto_do_professor(personagem_x, personagem_y, professor_x, professor_y))
                 {
-                    al_draw_text(
-                        fonte, al_map_rgb(255, 255, 0), professor_x - camera_x + prof_w / 2, professor_y - camera_y - 14, ALLEGRO_ALIGN_CENTER, "[E] Falar");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 0), professor_x - camera_x + prof_w / 2, professor_y - camera_y - 14, ALLEGRO_ALIGN_CENTER, "[E] Falar");
                 }
             }
             else
             {
-                al_draw_text(
-                    fonte, al_map_rgb(255, 80, 80), 10, 10, ALLEGRO_ALIGN_LEFT, "spriteprofessor.png nao encontrado");
+                al_draw_text(fonte, al_map_rgb(255, 80, 80), 10, 10, ALLEGRO_ALIGN_LEFT, "spriteprofessor.png nao encontrado");    
             }
 
-            al_draw_scaled_bitmap(
-                personagem_sprites, direcao * 52, (andando ? 1 : 0) * 96, 52, 96, personagem_x - camera_x, personagem_y - camera_y, CELL_W, CELL_H, 0);
-
-            al_draw_text(
-                fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
-
+            al_draw_scaled_bitmap(personagem_sprites, direcao * 52, (andando ? 1 : 0) * 96, 52, 96, personagem_x - camera_x, personagem_y - camera_y, CELL_W, CELL_H, 0);
+                
+            al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
 
             if (conversando && !perguntando)
             {
@@ -581,47 +536,37 @@ int main()
                 al_draw_rectangle(
                     140, 570, 1140, 700, al_map_rgb(220, 220, 220), 2);
 
-                al_draw_text(
-                    fonte, al_map_rgb(255, 255, 0), 160, 585, ALLEGRO_ALIGN_LEFT, "PROFESSOR");
-
-                al_draw_multiline_text(
-                    fonte, al_map_rgb(255, 255, 255), 160, 610, 960, 14, ALLEGRO_ALIGN_LEFT, falas[pagina_fala]);
-
+                al_draw_text(fonte, al_map_rgb(255, 255, 0), 160, 585, ALLEGRO_ALIGN_LEFT, "PROFESSOR");
+                    
+                al_draw_multiline_text( fonte, al_map_rgb(255, 255, 255), 160, 610, 960, 14, ALLEGRO_ALIGN_LEFT, falas[pagina_fala]);
+                   
                 sprintf_s(numero_pagina, sizeof(numero_pagina), "%d/%d", pagina_fala + 1, QTD_FALAS);
 
-                al_draw_text(
-                    fonte, al_map_rgb(200, 200, 200), 160, 680, ALLEGRO_ALIGN_LEFT, numero_pagina);
-
-                al_draw_text(
-                    fonte, al_map_rgb(200, 200, 200), 1120, 680, ALLEGRO_ALIGN_RIGHT, "[E] Continuar   [ESC] Fechar");
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 160, 680, ALLEGRO_ALIGN_LEFT, numero_pagina);
+                    
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 1120, 680, ALLEGRO_ALIGN_RIGHT, "[E] Continuar   [ESC] Fechar");
             }
 
             if (perguntando)
             {
-                al_draw_filled_rectangle(
-                    0, 0, 1280, 720, al_map_rgba(0, 0, 0, 180));
+                al_draw_filled_rectangle(0, 0, 1280, 720, al_map_rgba(0, 0, 0, 180));
 
-                al_draw_filled_rectangle(
-                    300, 150, 980, 570, al_map_rgb(35, 35, 45));
+                al_draw_filled_rectangle( 300, 150, 980, 570, al_map_rgb(35, 35, 45));
+                   
+                al_draw_rectangle( 300, 150, 980, 570, al_map_rgb(220, 220, 220), 2);
+                   
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 170, ALLEGRO_ALIGN_CENTER, "PORTA BLOQUEADA - RESOLVA A EQUACAO");
 
-                al_draw_rectangle(
-                    300, 150, 980, 570, al_map_rgb(220, 220, 220), 2);
-
-                al_draw_text(
-                    fonte, al_map_rgb(255, 255, 255), 640, 170, ALLEGRO_ALIGN_CENTER, "PORTA BLOQUEADA - RESOLVA A EQUACAO");
-
-                al_draw_text(
-                    fonte, al_map_rgb(255, 255, 0), 640, 205, ALLEGRO_ALIGN_CENTER, perguntas[pergunta_atual].enunciado);
-
-                al_draw_text(
-                    fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, "Qual o valor de x?");
-
-                al_draw_filled_rectangle(
-                    380, 240, 900, 280, al_map_rgb(15, 15, 20));
-                al_draw_rectangle(
-                    380, 240, 900, 280, al_map_rgb(180, 180, 180), 2);
-                al_draw_text(
-                    fonte, al_map_rgb(255, 255, 255), 640, 256, ALLEGRO_ALIGN_CENTER, resposta);
+                al_draw_text(fonte, al_map_rgb(255, 255, 0), 640, 205, ALLEGRO_ALIGN_CENTER, perguntas[pergunta_atual].enunciado);
+                    
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, "Qual o valor de x?");
+                    
+                al_draw_filled_rectangle(380, 240, 900, 280, al_map_rgb(15, 15, 20));
+                    
+                al_draw_rectangle(380, 240, 900, 280, al_map_rgb(180, 180, 180), 2);
+                    
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 256, ALLEGRO_ALIGN_CENTER, resposta);
+                    
 
                 const char* rotulos[12] = { "1","2","3","4","5","6","7","8","9","-","0","<" };
 
