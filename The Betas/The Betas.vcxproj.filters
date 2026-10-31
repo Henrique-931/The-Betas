@@ -22,4 +22,10 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\..\..\Downloads\spriteprofessor.png" />
+    <Image Include="..\..\..\The Betas\The Betas\x64\Debug\spriteprofessor.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+  </ItemGroup>
 </Project>

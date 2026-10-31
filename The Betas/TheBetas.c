@@ -19,6 +19,11 @@
 
 #define QTD_PERGUNTAS 7
 
+#define PROF_COLUNAS 7
+#define PROF_LINHAS 4
+#define QTD_FALAS 9
+#define DISTANCIA_PROFESSOR 110
+
 enum { DIR_BAIXO = 0, DIR_CIMA = 1, DIR_ESQUERDA = 2, DIR_DIREITA = 3 };
 
 typedef struct
@@ -35,6 +40,18 @@ Pergunta perguntas[QTD_PERGUNTAS] = {
     {"4(2x - 3) = 3(x + 6) - 5", 5},
     {"7x - 4 = 2x - 24", -4},
     {"(2x - 1)/3 = (x + 4)/2", 14}
+};
+
+char falas[QTD_FALAS][200] = {
+    "Ola, aluno! Eu sou o Professor. Fique por perto: vou te ensinar o basico para abrir as portas deste labirinto.",
+    "Uma equacao do 1o grau tem uma letra, o x, chamada de incognita. Resolver a equacao e descobrir quanto vale esse x.",
+    "Pense numa balanca: os dois lados do sinal de = precisam ficar equilibrados. Tudo o que voce fizer de um lado, faca do outro.",
+    "Regra pratica: o que esta somando de um lado passa subtraindo para o outro lado. O que esta multiplicando passa dividindo.",
+    "Exemplo 1: x + 5 = 12. Passo o 5 subtraindo: x = 12 - 5. Entao x = 7.",
+    "Exemplo 2: 3x - 4 = 11. Passo o 4 somando: 3x = 15. O 3 multiplica, entao passa dividindo: x = 15 / 3 = 5.",
+    "Com x dos dois lados, junte os x de um lado e os numeros do outro. Ex: 5x - 3 = 2x + 9 -> 3x = 12 -> x = 4.",
+    "Com parenteses, multiplique primeiro: 3(x - 2) = 3x - 6. Com fracoes, multiplique tudo pelo denominador comum.",
+    "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!"
 };
 
 int mapa[LINHAS][COLUNAS] = {
@@ -150,6 +167,20 @@ void desenhar_botao(ALLEGRO_FONT* fonte, float x1, float y1, float x2, float y2,
         (x1 + x2) / 2, (y1 + y2) / 2 - 4, ALLEGRO_ALIGN_CENTER, texto);
 }
 
+bool perto_do_professor(float jogador_x, float jogador_y, float prof_x, float prof_y)
+{
+    float dx = jogador_x - prof_x;
+    float dy = jogador_y - prof_y;
+
+    if (dx < 0)
+        dx = -dx;
+
+    if (dy < 0)
+        dy = -dy;
+
+    return (dx < DISTANCIA_PROFESSOR && dy < DISTANCIA_PROFESSOR);
+}
+
 int main()
 {
     srand(time(NULL));
@@ -177,6 +208,26 @@ int main()
         printf("Erro ao carregar uma das imagens.\n");
         return 1;
     }
+
+    ALLEGRO_BITMAP* prof_sprites = al_load_bitmap("spriteprofessor.png");
+    bool tem_professor = (prof_sprites != NULL);
+    int prof_quadro_w = 1;
+    int prof_quadro_h = 1;
+
+    if (tem_professor)
+    {
+        prof_quadro_w = al_get_bitmap_width(prof_sprites) / PROF_COLUNAS;
+        prof_quadro_h = al_get_bitmap_height(prof_sprites) / PROF_LINHAS;
+    }
+    else
+    {
+        printf("Nao achei spriteprofessor.png, o jogo vai abrir sem o professor.\n");
+    }
+
+    float prof_h = 55;
+    float prof_w = prof_h * prof_quadro_w / prof_quadro_h;
+    float professor_x = 3 * TILE_SIZE + 6;
+    float professor_y = 1 * TILE_SIZE + 5;
 
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT_QUEUE* evento = al_create_event_queue();
@@ -208,6 +259,10 @@ int main()
     float camera_x = 0;
     float camera_y = 0;
 
+    bool conversando = false;
+    int pagina_fala = 0;
+    int contador_anim = 0;
+
     while (rodando)
     {
         ALLEGRO_EVENT ev;
@@ -221,6 +276,31 @@ int main()
                 resposta[0] = '\0';
                 tamanho_resposta = 0;
             }
+        }
+
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN && !perguntando && tem_professor)
+        {
+            if (ev.keyboard.keycode == ALLEGRO_KEY_E)
+            {
+                if (conversando == false)
+                {
+                    if (perto_do_professor(personagem_x, personagem_y, professor_x, professor_y))
+                    {
+                        conversando = true;
+                        pagina_fala = 0;
+                    }
+                }
+                else
+                {
+                    pagina_fala++;
+
+                    if (pagina_fala >= QTD_FALAS)
+                        conversando = false;
+                }
+            }
+
+            if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                conversando = false;
         }
 
         if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && perguntando && ev.mouse.button == 1)
@@ -267,20 +347,20 @@ int main()
 
                             tamanho_resposta++;
                             resposta[tamanho_resposta] = '\0';
-              }
-              }
-              }
+                        }
+                    }
+                }
             }
 
             if (clicou(mx, my, 640, 290, 900, 350))
             {
-             if (tamanho_resposta > 0 && !(tamanho_resposta == 1 && resposta[0] == '-')){
-                  if (atoi(resposta) == perguntas[pergunta_atual].resposta)
+                if (tamanho_resposta > 0 && !(tamanho_resposta == 1 && resposta[0] == '-')) {
+                    if (atoi(resposta) == perguntas[pergunta_atual].resposta)
                     {
-                      abrir_porta(porta_linha, porta_coluna);
-                      perguntando = false;
+                        abrir_porta(porta_linha, porta_coluna);
+                        perguntando = false;
                     }
-                  else
+                    else
                     {
                         sprintf_s(mensagem, sizeof(mensagem), "Resposta errada");
                     }
@@ -393,6 +473,14 @@ int main()
             if (camera_y > LINHAS * TILE_SIZE - 720)
                 camera_y = LINHAS * TILE_SIZE - 720;
 
+            contador_anim++;
+
+            if (contador_anim >= 30)
+                contador_anim = 0;
+
+            if (conversando && !perto_do_professor(personagem_x, personagem_y, professor_x, professor_y))
+                conversando = false;
+
             redesenhando = true;
         }
 
@@ -407,8 +495,63 @@ int main()
 
             desenhar_mapa(camera_x, camera_y, tile_parede, tile_porta);
 
+            if (tem_professor)
+            {
+                int quadro_linha = 0;
+                int quadro_coluna = 0;
+
+                if (conversando)
+                {
+                    quadro_linha = 2;
+
+                    if (contador_anim < 15)
+                        quadro_coluna = 0;
+                    else
+                        quadro_coluna = 1;
+                }
+
+                al_draw_scaled_bitmap(
+                    prof_sprites, quadro_coluna * prof_quadro_w, quadro_linha * prof_quadro_h, prof_quadro_w, prof_quadro_h, professor_x - camera_x, professor_y - camera_y, prof_w, prof_h, 0);
+
+                if (!conversando && perto_do_professor(personagem_x, personagem_y, professor_x, professor_y))
+                {
+                    al_draw_text(
+                        fonte, al_map_rgb(255, 255, 0), professor_x - camera_x + prof_w / 2, professor_y - camera_y - 14, ALLEGRO_ALIGN_CENTER, "[E] Falar");
+                }
+            }
+            else
+            {
+                al_draw_text(
+                    fonte, al_map_rgb(255, 80, 80), 10, 10, ALLEGRO_ALIGN_LEFT, "spriteprofessor.png nao encontrado");
+            }
+
             al_draw_scaled_bitmap(
                 personagem_sprites, direcao * 52, (andando ? 1 : 0) * 96, 52, 96, personagem_x - camera_x, personagem_y - camera_y, CELL_W, CELL_H, 0);
+
+            if (conversando && !perguntando)
+            {
+                char numero_pagina[20];
+
+                al_draw_filled_rectangle(
+                    140, 570, 1140, 700, al_map_rgb(35, 35, 45));
+
+                al_draw_rectangle(
+                    140, 570, 1140, 700, al_map_rgb(220, 220, 220), 2);
+
+                al_draw_text(
+                    fonte, al_map_rgb(255, 255, 0), 160, 585, ALLEGRO_ALIGN_LEFT, "PROFESSOR");
+
+                al_draw_multiline_text(
+                    fonte, al_map_rgb(255, 255, 255), 160, 610, 960, 14, ALLEGRO_ALIGN_LEFT, falas[pagina_fala]);
+
+                sprintf_s(numero_pagina, sizeof(numero_pagina), "%d/%d", pagina_fala + 1, QTD_FALAS);
+
+                al_draw_text(
+                    fonte, al_map_rgb(200, 200, 200), 160, 680, ALLEGRO_ALIGN_LEFT, numero_pagina);
+
+                al_draw_text(
+                    fonte, al_map_rgb(200, 200, 200), 1120, 680, ALLEGRO_ALIGN_RIGHT, "[E] Continuar   [ESC] Fechar");
+            }
 
             if (perguntando)
             {
@@ -459,6 +602,9 @@ int main()
             al_flip_display();
         }
     }
+
+    if (tem_professor)
+        al_destroy_bitmap(prof_sprites);
 
     al_destroy_bitmap(tile_porta);
     al_destroy_bitmap(tile_parede);
