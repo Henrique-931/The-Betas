@@ -263,6 +263,10 @@ int main()
     int pagina_fala = 0;
     int contador_anim = 0;
 
+    bool caderno_aberto = false;
+    int pagina_caderno = 0;
+    int falas_lidas = 0;
+
     while (rodando)
     {
         ALLEGRO_EVENT ev;
