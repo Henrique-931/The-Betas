@@ -282,6 +282,22 @@ int main()
             }
         }
 
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+        {
+            if (ev.keyboard.keycode == ALLEGRO_KEY_N && conversando == false)
+            {
+                if (caderno_aberto)
+                {
+                    caderno_aberto = false;
+                }
+                else
+                {
+                    caderno_aberto = true;
+                }
+            }
+        }
+
+
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN && !perguntando && tem_professor)
         {
             if (ev.keyboard.keycode == ALLEGRO_KEY_E)
@@ -532,6 +548,10 @@ int main()
             al_draw_scaled_bitmap(
                 personagem_sprites, direcao * 52, (andando ? 1 : 0) * 96, 52, 96, personagem_x - camera_x, personagem_y - camera_y, CELL_W, CELL_H, 0);
 
+            al_draw_text(
+                fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
+
+
             if (conversando && !perguntando)
             {
                 char numero_pagina[20];
@@ -601,6 +621,24 @@ int main()
 
                 al_draw_text(
                     fonte, al_map_rgb(255, 80, 80), 640, 530, ALLEGRO_ALIGN_CENTER, mensagem);
+            }
+
+            if (caderno_aberto)
+            {
+                al_draw_filled_rectangle(0, 0, 1280, 720, al_map_rgba(0, 0, 0, 150));
+                   
+
+                al_draw_filled_rectangle(240, 100, 1040, 620, al_map_rgb(245, 235, 200));
+                    
+
+                al_draw_rectangle(240, 100, 1040, 620, al_map_rgb(110, 70, 30), 4);
+                    
+
+                al_draw_text(fonte, al_map_rgb(110, 70, 30), 640, 120, ALLEGRO_ALIGN_CENTER, "CADERNO DE ANOTACOES");
+                    
+
+                al_draw_line(280, 145, 1000, 145, al_map_rgb(110, 70, 30), 2);
+                    
             }
 
             al_flip_display();
