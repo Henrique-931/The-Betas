@@ -226,8 +226,8 @@ int main()
 
     float prof_h = 55;
     float prof_w = prof_h * prof_quadro_w / prof_quadro_h;
-    float professor_x = 3 * TILE_SIZE + 6;
-    float professor_y = 1 * TILE_SIZE + 5;
+    float professor_x = 11 * TILE_SIZE + 6;
+    float professor_y = 11 * TILE_SIZE + 5;
 
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT_QUEUE* evento = al_create_event_queue();
