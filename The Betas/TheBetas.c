@@ -272,7 +272,7 @@ int main()
         ALLEGRO_EVENT ev;
         al_wait_for_event(evento, &ev);
 
-        if (ev.type == ALLEGRO_EVENT_KEY_DOWN && perguntando)
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN && perguntando && !caderno_aberto)
         {
             if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
             {
@@ -293,12 +293,28 @@ int main()
                 else
                 {
                     caderno_aberto = true;
+                    pagina_caderno = falas_lidas - 1;
+
+                    if (pagina_caderno < 0)
+                        pagina_caderno = 0;
                 }
+            }
+
+            if (caderno_aberto)
+            {
+                if (ev.keyboard.keycode == ALLEGRO_KEY_LEFT && pagina_caderno > 0)
+                    pagina_caderno--;
+
+                if (ev.keyboard.keycode == ALLEGRO_KEY_RIGHT && pagina_caderno < falas_lidas - 1)
+                    pagina_caderno++;
+
+                if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE)
+                    caderno_aberto = false;
             }
         }
 
 
-        if (ev.type == ALLEGRO_EVENT_KEY_DOWN && !perguntando && tem_professor)
+        if (ev.type == ALLEGRO_EVENT_KEY_DOWN && !perguntando && tem_professor && !caderno_aberto)
         {
             if (ev.keyboard.keycode == ALLEGRO_KEY_E)
             {
@@ -323,7 +339,7 @@ int main()
                 conversando = false;
         }
 
-        if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && perguntando && ev.mouse.button == 1)
+        if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && perguntando && !caderno_aberto && ev.mouse.button == 1)
         {
             float mx = ev.mouse.x;
             float my = ev.mouse.y;
@@ -408,7 +424,7 @@ int main()
             float novo_x = personagem_x;
             float novo_y = personagem_y;
 
-            if (!perguntando)
+            if (!perguntando && !caderno_aberto)
             {
                 if (al_key_down(&teclado, ALLEGRO_KEY_RIGHT))
                 {
@@ -494,6 +510,9 @@ int main()
                 camera_y = LINHAS * TILE_SIZE - 720;
 
             contador_anim++;
+
+            if (conversando && pagina_fala + 1 > falas_lidas)
+                falas_lidas = pagina_fala + 1;
 
             if (contador_anim >= 30)
                 contador_anim = 0;
@@ -625,20 +644,33 @@ int main()
 
             if (caderno_aberto)
             {
+                char titulo_nota[40];
+
                 al_draw_filled_rectangle(0, 0, 1280, 720, al_map_rgba(0, 0, 0, 150));
-                   
 
                 al_draw_filled_rectangle(240, 100, 1040, 620, al_map_rgb(245, 235, 200));
-                    
 
                 al_draw_rectangle(240, 100, 1040, 620, al_map_rgb(110, 70, 30), 4);
-                    
 
                 al_draw_text(fonte, al_map_rgb(110, 70, 30), 640, 120, ALLEGRO_ALIGN_CENTER, "CADERNO DE ANOTACOES");
-                    
 
                 al_draw_line(280, 145, 1000, 145, al_map_rgb(110, 70, 30), 2);
-                    
+
+                if (falas_lidas == 0)
+                {
+                    al_draw_multiline_text(fonte, al_map_rgb(40, 30, 20), 280, 190, 720, 16, ALLEGRO_ALIGN_LEFT,
+                        "Voce ainda nao conversou com o professor. Chegue perto dele e aperte E: tudo o que ele explicar vai aparecer aqui.");
+                }
+                else
+                {
+                    sprintf_s(titulo_nota, sizeof(titulo_nota), "Anotacao %d de %d", pagina_caderno + 1, falas_lidas);
+
+                    al_draw_text(fonte, al_map_rgb(150, 40, 40), 280, 165, ALLEGRO_ALIGN_LEFT, titulo_nota);
+
+                    al_draw_multiline_text(fonte, al_map_rgb(40, 30, 20), 280, 200, 720, 16, ALLEGRO_ALIGN_LEFT, falas[pagina_caderno]);
+                }
+
+                al_draw_text(fonte, al_map_rgb(110, 70, 30), 640, 590, ALLEGRO_ALIGN_CENTER, "[<] [>] Trocar anotacao   [N] ou [ESC] Fechar");
             }
 
             al_flip_display();
