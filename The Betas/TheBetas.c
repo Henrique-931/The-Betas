@@ -158,6 +158,38 @@ void desenhar_botao(ALLEGRO_FONT* fonte, float x1, float y1, float x2, float y2,
     al_draw_text(fonte, al_map_rgb(255, 255, 255), (x1 + x2) / 2, (y1 + y2) / 2 - 4, ALLEGRO_ALIGN_CENTER, texto);
 }
 
+void desenhar_botao_menu(ALLEGRO_FONT* fonte, float x1, float y1, float x2, float y2, const char* texto, bool selecionado)
+{
+    if (selecionado)
+    {
+        al_draw_filled_rectangle(x1, y1, x2, y2, al_map_rgb(110, 110, 170));
+        al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(255, 220, 60), 3);
+        al_draw_text(fonte, al_map_rgb(255, 220, 60), (x1 + x2) / 2, (y1 + y2) / 2 - 4, ALLEGRO_ALIGN_CENTER, texto);
+    }
+    else
+    {
+        al_draw_filled_rectangle(x1, y1, x2, y2, al_map_rgb(70, 70, 90));
+        al_draw_rectangle(x1, y1, x2, y2, al_map_rgb(220, 220, 220), 2);
+        al_draw_text(fonte, al_map_rgb(255, 255, 255), (x1 + x2) / 2, (y1 + y2) / 2 - 4, ALLEGRO_ALIGN_CENTER, texto);
+    }
+}
+
+void desenhar_texto_grande(ALLEGRO_FONT* fonte, ALLEGRO_COLOR cor, float x, float y, int escala, const char* texto)
+{
+    int largura = al_get_text_width(fonte, texto);
+    int altura = al_get_font_line_height(fonte);
+    ALLEGRO_BITMAP* destino = al_get_target_bitmap();
+    ALLEGRO_BITMAP* temporario = al_create_bitmap(largura, altura);
+
+    al_set_target_bitmap(temporario);
+    al_clear_to_color(al_map_rgba(0, 0, 0, 0));
+    al_draw_text(fonte, cor, 0, 0, ALLEGRO_ALIGN_LEFT, texto);
+    al_set_target_bitmap(destino);
+
+    al_draw_scaled_bitmap(temporario, 0, 0, largura, altura, x - largura * escala / 2, y, largura * escala, altura * escala, 0);
+    al_destroy_bitmap(temporario);
+}
+
 bool perto_do_professor(float jogador_x, float jogador_y, float prof_x, float prof_y)
 {
     float dx = jogador_x - prof_x;
