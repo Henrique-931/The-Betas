@@ -93,6 +93,8 @@ int mapa[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
 };
 
+int mapa_original[LINHAS][COLUNAS];
+
 Inspetor inspetores[QTD_INSPETORES];
 
 int insp_x[7] = { 272, 477, 679, 879, 1081, 1289, 1493 };
@@ -144,6 +146,24 @@ void abrir_porta(int linha, int coluna)
 {
     if (mapa[linha][coluna] == PORTA_FECHADA)
         mapa[linha][coluna] = CHAO;
+}
+
+void guardar_mapa()
+{
+    for (int i = 0; i < LINHAS; i++)
+    {
+        for (int j = 0; j < COLUNAS; j++)
+            mapa_original[i][j] = mapa[i][j];
+    }
+}
+
+void reiniciar_mapa()
+{
+    for (int i = 0; i < LINHAS; i++)
+    {
+        for (int j = 0; j < COLUNAS; j++)
+            mapa[i][j] = mapa_original[i][j];
+    }
 }
 
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
@@ -482,6 +502,7 @@ int main()
     float professor_x = 11 * TILE_SIZE + 6;
     float professor_y = 11 * TILE_SIZE + 5;
 
+    guardar_mapa();
     reiniciar_inspetores();
 
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
