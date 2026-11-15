@@ -419,7 +419,7 @@ int main()
     al_set_window_title(display, "The Betas");
     ALLEGRO_FONT* fonte = al_create_builtin_font();
 
-    ALLEGRO_BITMAP* personagem_sprites = al_load_bitmap("personagem_spritesheet.png");
+    ALLEGRO_BITMAP* personagem_sprites = al_load_bitmap("personagem_sprite.png");
     ALLEGRO_BITMAP* tile_parede = al_load_bitmap("tileparede_mapa1.png");
     ALLEGRO_BITMAP* tile_porta = al_load_bitmap("porta_mapa.png");
     ALLEGRO_BITMAP* inspetor_sprites = al_load_bitmap("Sprite_inspetor.png");
@@ -482,6 +482,7 @@ int main()
     bool caderno_aberto = false;
     int pagina_caderno = 0;
     int falas_lidas = 0;
+    int anim_andar = 0;
 
     while (rodando)
     {
@@ -690,6 +691,11 @@ int main()
                 }
             }
 
+            if (andando)
+                anim_andar++;
+            else
+                anim_andar = 0;
+
             if (!perguntando && !caderno_aberto && !conversando)
             {
                 for (int i = 0; i < QTD_INSPETORES; i++)
@@ -789,7 +795,14 @@ int main()
                 al_draw_scaled_bitmap(inspetor_sprites, insp_x[coluna] - 75, insp_y[linha], 150, insp_h[linha], inspetores[i].x - camera_x, inspetores[i].y - camera_y + CELL_H - altura, CELL_W, altura, 0);
             }
 
-            al_draw_scaled_bitmap(personagem_sprites, direcao * 52, (andando ? 1 : 0) * 96, 52, 96, personagem_x - camera_x, personagem_y - camera_y, CELL_W, CELL_H, 0);
+            int quadro = 1;
+            float larg = CELL_H * 56.0 / 100.0;
+            float off_x = (CELL_W - larg) / 2;
+
+            if (andando)
+                quadro = (anim_andar / 8) % 4;
+
+            al_draw_scaled_bitmap(personagem_sprites, quadro * 56, direcao * 100, 56, 100, personagem_x - camera_x + off_x, personagem_y - camera_y, larg, CELL_H, 0);
 
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
 
@@ -804,7 +817,7 @@ int main()
 
                 sprintf_s(numero_pagina, sizeof(numero_pagina), "%d/%d", pagina_fala + 1, QTD_FALAS);
 
-                al_draw_text(fonte, al_map_rgb(200, 200, 200), 160, 680, ALLEGRO_ALIGN_LEFT, numero_pagina);b  
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 160, 680, ALLEGRO_ALIGN_LEFT, numero_pagina);
                 al_draw_text(fonte, al_map_rgb(200, 200, 200), 1120, 680, ALLEGRO_ALIGN_RIGHT, "[E] Continuar   [ESC] Fechar");
             }
 

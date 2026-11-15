@@ -24,5 +24,11 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="..\..\..\..\..\Downloads\spriteprofessor.png" />
+    <Image Include="..\..\..\The Betas\x64\Debug\Sprite_inspetor.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\personagem_sprite.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
   </ItemGroup>
 </Project>
