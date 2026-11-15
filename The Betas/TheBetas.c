@@ -51,10 +51,10 @@ Pergunta perguntas[QTD_PERGUNTAS] = {
     { "2x + 7 = 3x - 5", 12 },
     { "3(x - 2) + 5 = 2x + 7", 8 },
     { "5(x + 2) - 3x = 4x - 10", 10 },
-    { "x/2 + x/3 = 15", 18 },
+    { "6x - 9 = 2x + 15", 6 },
     { "4(2x - 3) = 3(x + 6) - 5", 5 },
     { "7x - 4 = 2x - 24", -4 },
-    { "(2x - 1)/3 = (x + 4)/2", 14 } };
+    { "2(x + 3) = x + 11", 5 }, };
 
 char falas[QTD_FALAS][200] = {
     "Ola, aluno! Eu sou o Professor. Fique por perto: vou te ensinar o basico para abrir as portas deste labirinto.",
