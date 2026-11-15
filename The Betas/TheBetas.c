@@ -21,6 +21,8 @@
 #define PROF_COLUNAS 7
 #define PROF_LINHAS 4
 #define DISTANCIA_PROFESSOR 110
+#define SAIDA_LINHA 23
+#define SAIDA_COLUNA 34
 
 enum { DIR_BAIXO, DIR_CIMA, DIR_ESQUERDA, DIR_DIREITA };
 
@@ -540,6 +542,9 @@ int main()
     bool ajuda_aberta = false;
     int opcao_menu = 0;
     int contador_menu = 0;
+    bool fim_de_jogo = false;
+    int opcao_fim = 0;
+    int contador_fim = 0;
 
     while (rodando)
     {
@@ -657,6 +662,111 @@ int main()
                     al_draw_text(fonte, al_map_rgb(255, 120, 120), 280, 405, ALLEGRO_ALIGN_LEFT, "Fuja dos inspetores! Se eles te pegarem, voce volta ao inicio.");
                     al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 535, ALLEGRO_ALIGN_CENTER, "Clique ou aperte [ENTER] para voltar");
                 }
+
+                al_flip_display();
+            }
+
+            continue;
+        }
+
+        if (fim_de_jogo)
+        {
+            bool confirmou = false;
+
+            if (ev.type == ALLEGRO_EVENT_DISPLAY_CLOSE)
+                rodando = false;
+
+            if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
+            {
+                if (ev.keyboard.keycode == ALLEGRO_KEY_UP)
+                    opcao_fim = (opcao_fim + 1) % 2;
+                if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN)
+                    opcao_fim = (opcao_fim + 1) % 2;
+                if (ev.keyboard.keycode == ALLEGRO_KEY_ENTER)
+                    confirmou = true;
+            }
+
+            if (ev.type == ALLEGRO_EVENT_MOUSE_AXES)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    if (clicou(ev.mouse.x, ev.mouse.y, 540, 330 + k * 80, 740, 390 + k * 80))
+                        opcao_fim = k;
+                }
+            }
+
+            if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && ev.mouse.button == 1)
+            {
+                for (int k = 0; k < 2; k++)
+                {
+                    if (clicou(ev.mouse.x, ev.mouse.y, 540, 330 + k * 80, 740, 390 + k * 80))
+                    {
+                        opcao_fim = k;
+                        confirmou = true;
+                    }
+                }
+            }
+
+            if (confirmou)
+            {
+                if (opcao_fim == 0)
+                {
+                    reiniciar_mapa();
+                    reiniciar_inspetores();
+
+                    personagem_x = 80;
+                    personagem_y = 60;
+                    direcao = DIR_BAIXO;
+                    andando = false;
+                    anim_andar = 0;
+                    conversando = false;
+                    perguntando = false;
+                    caderno_aberto = false;
+                    pagina_fala = 0;
+                    pagina_caderno = 0;
+                    falas_lidas = 0;
+                    resposta[0] = '\0';
+                    tamanho_resposta = 0;
+                    mensagem[0] = '\0';
+                    opcao_fim = 0;
+                    fim_de_jogo = false;
+                }
+                else
+                {
+                    rodando = false;
+                }
+            }
+
+            if (ev.type == ALLEGRO_EVENT_TIMER)
+            {
+                contador_fim++;
+                if (contador_fim >= 672)
+                    contador_fim = 0;
+            }
+
+            if (ev.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(evento))
+            {
+                const char* rotulos_fim[2] = { "JOGAR DE NOVO", "SAIR" };
+
+                al_clear_to_color(al_map_rgb(25, 25, 40));
+
+                for (int j = 0; j < 22; j++)
+                {
+                    al_draw_scaled_bitmap(tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), j * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE, 0);
+                    al_draw_scaled_bitmap(tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), j * TILE_SIZE, 720 - TILE_SIZE, TILE_SIZE, TILE_SIZE, 0);
+                }
+
+                desenhar_texto_grande(fonte, al_map_rgb(0, 0, 0), 646, 116, 8, "VOCE ESCAPOU!");
+                desenhar_texto_grande(fonte, al_map_rgb(120, 255, 120), 640, 110, 8, "VOCE ESCAPOU!");
+                desenhar_texto_grande(fonte, al_map_rgb(200, 200, 200), 640, 220, 2, "Voce resolveu as equacoes e saiu do labirinto!");
+
+                al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_DIREITA * 100, 56, 100, 150, 300, 123, 220, 0);
+                al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_ESQUERDA * 100, 56, 100, 1010, 300, 123, 220, 0);
+
+                for (int k = 0; k < 2; k++)
+                    desenhar_botao_menu(fonte, 540, 330 + k * 80, 740, 390 + k * 80, rotulos_fim[k], opcao_fim == k);
+
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 600, ALLEGRO_ALIGN_CENTER, "[SETAS] Escolher   [ENTER] Confirmar");
 
                 al_flip_display();
             }
@@ -897,6 +1007,12 @@ int main()
                     mensagem[0] = '\0';
                 }
             }
+
+            int coluna_atual = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
+            int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
+
+            if (linha_atual == SAIDA_LINHA && coluna_atual == SAIDA_COLUNA)
+                fim_de_jogo = true;
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
             camera_y = personagem_y + CELL_H / 2 - 720 / 2;
