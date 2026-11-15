@@ -516,6 +516,7 @@ int main()
     int falas_lidas = 0;
     int anim_andar = 0;
     bool no_menu = true;
+    bool ajuda_aberta = false;
     int opcao_menu = 0;
     int contador_menu = 0;
 
@@ -533,17 +534,25 @@ int main()
 
             if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
             {
-                if (ev.keyboard.keycode == ALLEGRO_KEY_UP)
-                    opcao_menu = (opcao_menu + 1) % 2;
-                if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN)
-                    opcao_menu = (opcao_menu + 1) % 2;
-                if (ev.keyboard.keycode == ALLEGRO_KEY_ENTER)
-                    confirmou = true;
+                if (ajuda_aberta)
+                {
+                    if (ev.keyboard.keycode == ALLEGRO_KEY_ESCAPE || ev.keyboard.keycode == ALLEGRO_KEY_ENTER)
+                        ajuda_aberta = false;
+                }
+                else
+                {
+                    if (ev.keyboard.keycode == ALLEGRO_KEY_UP)
+                        opcao_menu = (opcao_menu + 2) % 3;
+                    if (ev.keyboard.keycode == ALLEGRO_KEY_DOWN)
+                        opcao_menu = (opcao_menu + 1) % 3;
+                    if (ev.keyboard.keycode == ALLEGRO_KEY_ENTER)
+                        confirmou = true;
+                }
             }
 
-            if (ev.type == ALLEGRO_EVENT_MOUSE_AXES)
+            if (ev.type == ALLEGRO_EVENT_MOUSE_AXES && !ajuda_aberta)
             {
-                for (int k = 0; k < 2; k++)
+                for (int k = 0; k < 3; k++)
                 {
                     if (clicou(ev.mouse.x, ev.mouse.y, 540, 330 + k * 80, 740, 390 + k * 80))
                         opcao_menu = k;
@@ -552,12 +561,19 @@ int main()
 
             if (ev.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && ev.mouse.button == 1)
             {
-                for (int k = 0; k < 2; k++)
+                if (ajuda_aberta)
                 {
-                    if (clicou(ev.mouse.x, ev.mouse.y, 540, 330 + k * 80, 740, 390 + k * 80))
+                    ajuda_aberta = false;
+                }
+                else
+                {
+                    for (int k = 0; k < 3; k++)
                     {
-                        opcao_menu = k;
-                        confirmou = true;
+                        if (clicou(ev.mouse.x, ev.mouse.y, 540, 330 + k * 80, 740, 390 + k * 80))
+                        {
+                            opcao_menu = k;
+                            confirmou = true;
+                        }
                     }
                 }
             }
@@ -566,6 +582,8 @@ int main()
             {
                 if (opcao_menu == 0)
                     no_menu = false;
+                else if (opcao_menu == 1)
+                    ajuda_aberta = true;
                 else
                     rodando = false;
             }
@@ -579,7 +597,7 @@ int main()
 
             if (ev.type == ALLEGRO_EVENT_TIMER && al_is_event_queue_empty(evento))
             {
-                const char* rotulos_menu[2] = { "JOGAR", "SAIR" };
+                const char* rotulos_menu[3] = { "JOGAR", "COMO JOGAR", "SAIR" };
                 int linha = DIR_BAIXO;
                 int coluna = (contador_menu / 6) % 7;
                 float altura = insp_h[linha] * 220 / 218.0;
@@ -599,10 +617,25 @@ int main()
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_menu / 8) % 4) * 56, DIR_BAIXO * 100, 56, 100, 150, 300, 123, 220, 0);
                 al_draw_scaled_bitmap(inspetor_sprites, insp_x[coluna] - 75, insp_y[linha], 150, insp_h[linha], 1010, 300 + 220 - altura, 148, altura, 0);
 
-                for (int k = 0; k < 2; k++)
+                for (int k = 0; k < 3; k++)
                     desenhar_botao_menu(fonte, 540, 330 + k * 80, 740, 390 + k * 80, rotulos_menu[k], opcao_menu == k);
 
                 al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 600, ALLEGRO_ALIGN_CENTER, "[SETAS] Escolher   [ENTER] Confirmar");
+
+                if (ajuda_aberta)
+                {
+                    al_draw_filled_rectangle(0, 0, 1280, 720, al_map_rgba(0, 0, 0, 180));
+                    al_draw_filled_rectangle(240, 150, 1040, 570, al_map_rgb(35, 35, 45));
+                    al_draw_rectangle(240, 150, 1040, 570, al_map_rgb(220, 220, 220), 2);
+                    al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 175, ALLEGRO_ALIGN_CENTER, "COMO JOGAR");
+                    al_draw_line(280, 200, 1000, 200, al_map_rgb(220, 220, 220), 2);
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 235, ALLEGRO_ALIGN_LEFT, "[SETAS] Andar pelo labirinto");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 275, ALLEGRO_ALIGN_LEFT, "[E] Perto do professor: conversar e aprender equacoes");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 315, ALLEGRO_ALIGN_LEFT, "[E] Perto de uma porta: resolver a equacao para abri-la");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 355, ALLEGRO_ALIGN_LEFT, "[N] Abrir o caderno de anotacoes");
+                    al_draw_text(fonte, al_map_rgb(255, 120, 120), 280, 405, ALLEGRO_ALIGN_LEFT, "Fuja dos inspetores! Se eles te pegarem, voce volta ao inicio.");
+                    al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 535, ALLEGRO_ALIGN_CENTER, "Clique ou aperte [ENTER] para voltar");
+                }
 
                 al_flip_display();
             }
