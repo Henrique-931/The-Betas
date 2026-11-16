@@ -168,6 +168,28 @@ void reiniciar_mapa()
     }
 }
 
+bool fechar_porta_aleatoria()
+{
+    int candidatas[LINHAS * COLUNAS];
+    int qtd = 0;
+
+    for (int i = 0; i < LINHAS; i++)
+    {
+        for (int j = 0; j < COLUNAS; j++)
+        {
+            if (mapa_original[i][j] == PORTA_FECHADA && mapa[i][j] == CHAO)
+                candidatas[qtd++] = i * COLUNAS + j;
+        }
+    }
+
+    if (qtd == 0)
+        return false;
+
+    int escolhida = candidatas[rand() % qtd];
+    mapa[escolhida / COLUNAS][escolhida % COLUNAS] = PORTA_FECHADA;
+    return true;
+}
+
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
 {
     return (mx >= x1 && mx <= x2 && my >= y1 && my <= y2);
@@ -479,11 +501,10 @@ int main()
     ALLEGRO_BITMAP* inspetor_sprites = al_load_bitmap("Sprite_inspetor.png");
     ALLEGRO_BITMAP* prof_sprites = al_load_bitmap("spriteprofessor.png");
 
-    if (personagem_sprites == NULL || tile_parede == NULL || tile_porta == NULL || inspetor_sprites == NULL)
-    {
-        printf("Erro ao carregar uma das imagens.\n");
-        return 1;
-    }
+    if (!personagem_sprites) { printf("Erro: personagem_sprite.png\n"); return -1; }
+    if (!inspetor_sprites) { printf("Erro: Sprite_inspetor.png\n"); return -1; }
+    if (!tile_parede) { printf("Erro: tileparede_mapa1.png\n"); return -1; }
+    if (!tile_porta) { printf("Erro: porta_mapa.png\n"); return -1; }
 
     bool tem_professor = (prof_sprites != NULL);
     int prof_quadro_w = 1;
@@ -545,6 +566,7 @@ int main()
     bool fim_de_jogo = false;
     int opcao_fim = 0;
     int contador_fim = 0;
+    int aviso_porta = 0;
 
     while (rodando)
     {
@@ -729,6 +751,7 @@ int main()
                     tamanho_resposta = 0;
                     mensagem[0] = '\0';
                     opcao_fim = 0;
+                    aviso_porta = 0;
                     fim_de_jogo = false;
                 }
                 else
@@ -999,6 +1022,9 @@ int main()
                     personagem_y = 60;
                     reiniciar_inspetores();
 
+                    if (fechar_porta_aleatoria())
+                        aviso_porta = 180;
+
                     conversando = false;
                     perguntando = false;
                     caderno_aberto = false;
@@ -1025,6 +1051,9 @@ int main()
                 camera_x = COLUNAS * TILE_SIZE - 1280;
             if (camera_y > LINHAS * TILE_SIZE - 720)
                 camera_y = LINHAS * TILE_SIZE - 720;
+
+            if (aviso_porta > 0)
+                aviso_porta--;
 
             contador_anim++;
             if (contador_anim >= 30)
@@ -1096,6 +1125,9 @@ int main()
             al_draw_scaled_bitmap(personagem_sprites, quadro * 56, direcao * 100, 56, 100, personagem_x - camera_x + off_x, personagem_y - camera_y, larg, CELL_H, 0);
 
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
+
+            if (aviso_porta > 0)
+                al_draw_text(fonte, al_map_rgb(255, 120, 120), 640, 20, ALLEGRO_ALIGN_CENTER, "O inspetor te pegou e fechou uma porta do labirinto!");
 
             if (conversando && !perguntando)
             {
