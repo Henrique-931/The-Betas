@@ -190,6 +190,23 @@ bool fechar_porta_aleatoria()
     return true;
 }
 
+bool outras_portas_abertas()
+{
+    for (int i = 0; i < LINHAS; i++)
+    {
+        for (int j = 0; j < COLUNAS; j++)
+        {
+            if (i == SAIDA_LINHA && j == SAIDA_COLUNA)
+                continue;
+
+            if (mapa[i][j] == PORTA_FECHADA)
+                return false;
+        }
+    }
+
+    return true;
+}
+
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
 {
     return (mx >= x1 && mx <= x2 && my >= y1 && my <= y2);
@@ -567,6 +584,7 @@ int main()
     int opcao_fim = 0;
     int contador_fim = 0;
     int aviso_porta = 0;
+    int aviso_saida = 0;
 
     while (rodando)
     {
@@ -752,6 +770,7 @@ int main()
                     mensagem[0] = '\0';
                     opcao_fim = 0;
                     aviso_porta = 0;
+                    aviso_saida = 0;
                     fim_de_jogo = false;
                 }
                 else
@@ -985,13 +1004,20 @@ int main()
                             {
                                 if (mapa[i][j] == PORTA_FECHADA)
                                 {
-                                    porta_linha = i;
-                                    porta_coluna = j;
-                                    perguntando = true;
-                                    pergunta_atual = rand() % QTD_PERGUNTAS;
-                                    resposta[0] = '\0';
-                                    tamanho_resposta = 0;
-                                    mensagem[0] = '\0';
+                                    if (i == SAIDA_LINHA && j == SAIDA_COLUNA && !outras_portas_abertas())
+                                    {
+                                        aviso_saida = 180;
+                                    }
+                                    else
+                                    {
+                                        porta_linha = i;
+                                        porta_coluna = j;
+                                        perguntando = true;
+                                        pergunta_atual = rand() % QTD_PERGUNTAS;
+                                        resposta[0] = '\0';
+                                        tamanho_resposta = 0;
+                                        mensagem[0] = '\0';
+                                    }
                                 }
                             }
                         }
@@ -1054,6 +1080,8 @@ int main()
 
             if (aviso_porta > 0)
                 aviso_porta--;
+            if (aviso_saida > 0)
+                aviso_saida--;
 
             contador_anim++;
             if (contador_anim >= 30)
@@ -1125,6 +1153,9 @@ int main()
             al_draw_scaled_bitmap(personagem_sprites, quadro * 56, direcao * 100, 56, 100, personagem_x - camera_x + off_x, personagem_y - camera_y, larg, CELL_H, 0);
 
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
+
+            if (aviso_saida > 0)
+                al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "A porta da saida so abre depois que todas as outras portas estiverem abertas!");
 
             if (aviso_porta > 0)
                 al_draw_text(fonte, al_map_rgb(255, 120, 120), 640, 20, ALLEGRO_ALIGN_CENTER, "O inspetor te pegou e fechou uma porta do labirinto!");
