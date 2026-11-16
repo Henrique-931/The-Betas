@@ -103,7 +103,7 @@ int insp_x[7] = { 272, 477, 679, 879, 1081, 1289, 1493 };
 int insp_y[4] = { 17, 239, 458, 672 };
 int insp_h[4] = { 218, 219, 213, 207 };
 
-void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, ALLEGRO_BITMAP* tile_porta)
+void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, ALLEGRO_BITMAP* tile_porta, ALLEGRO_BITMAP* tile_porta_saida)
 {
     for (int i = 0; i < LINHAS; i++)
     {
@@ -115,7 +115,19 @@ void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, 
             if (mapa[i][j] == PAREDE)
                 al_draw_scaled_bitmap(tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), x, y, TILE_SIZE, TILE_SIZE, 0);
             else if (mapa[i][j] == PORTA_FECHADA)
-                al_draw_scaled_bitmap(tile_porta, 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+            {
+                if (i == SAIDA_LINHA && j == SAIDA_COLUNA)
+                {
+                    if (tile_porta_saida != NULL)
+                        al_draw_scaled_bitmap(tile_porta_saida, 0, 0, al_get_bitmap_width(tile_porta_saida), al_get_bitmap_height(tile_porta_saida), x, y, TILE_SIZE, TILE_SIZE, 0);
+                    else
+                        al_draw_tinted_scaled_bitmap(tile_porta, al_map_rgb(70, 130, 255), 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+                }
+                else
+                {
+                    al_draw_scaled_bitmap(tile_porta, 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+                }
+            }
             else
                 al_draw_filled_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180));
         }
@@ -205,6 +217,33 @@ bool outras_portas_abertas()
     }
 
     return true;
+}
+
+int carregar_hiscore()
+{
+    int valor = 0;
+    FILE* arq = NULL;
+
+    fopen_s(&arq, "hiscore.txt", "r");
+    if (arq != NULL)
+    {
+        fscanf_s(arq, "%d", &valor);
+        fclose(arq);
+    }
+
+    return valor;
+}
+
+void salvar_hiscore(int valor)
+{
+    FILE* arq = NULL;
+
+    fopen_s(&arq, "hiscore.txt", "w");
+    if (arq != NULL)
+    {
+        fprintf(arq, "%d", valor);
+        fclose(arq);
+    }
 }
 
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
@@ -517,6 +556,7 @@ int main()
     ALLEGRO_BITMAP* tile_porta = al_load_bitmap("porta_mapa.png");
     ALLEGRO_BITMAP* inspetor_sprites = al_load_bitmap("Sprite_inspetor.png");
     ALLEGRO_BITMAP* prof_sprites = al_load_bitmap("spriteprofessor.png");
+    ALLEGRO_BITMAP* tile_porta_saida = al_load_bitmap("porta_saida.png");
 
     if (!personagem_sprites) { printf("Erro: personagem_sprite.png\n"); return -1; }
     if (!inspetor_sprites) { printf("Erro: Sprite_inspetor.png\n"); return -1; }
@@ -585,6 +625,10 @@ int main()
     int contador_fim = 0;
     int aviso_porta = 0;
     int aviso_saida = 0;
+    int pontos = 0;
+    int hiscore = carregar_hiscore();
+    bool novo_recorde = false;
+    bool porta_pontuada[LINHAS][COLUNAS] = { 0 };
 
     while (rodando)
     {
@@ -680,6 +724,10 @@ int main()
                 desenhar_texto_grande(fonte, al_map_rgb(255, 220, 60), 640, 110, 10, "THE BETAS");
                 desenhar_texto_grande(fonte, al_map_rgb(200, 200, 200), 640, 220, 2, "Resolva as equacoes e escape do labirinto!");
 
+                char texto_recorde[40];
+                sprintf_s(texto_recorde, sizeof(texto_recorde), "Recorde: %d", hiscore);
+                al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 270, ALLEGRO_ALIGN_CENTER, texto_recorde);
+
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_menu / 8) % 4) * 56, DIR_BAIXO * 100, 56, 100, 150, 300, 123, 220, 0);
                 al_draw_scaled_bitmap(inspetor_sprites, insp_x[coluna] - 75, insp_y[linha], 150, insp_h[linha], 1010, 300 + 220 - altura, 148, altura, 0);
 
@@ -771,6 +819,15 @@ int main()
                     opcao_fim = 0;
                     aviso_porta = 0;
                     aviso_saida = 0;
+                    pontos = 0;
+                    novo_recorde = false;
+
+                    for (int i = 0; i < LINHAS; i++)
+                    {
+                        for (int j = 0; j < COLUNAS; j++)
+                            porta_pontuada[i][j] = false;
+                    }
+
                     fim_de_jogo = false;
                 }
                 else
@@ -804,6 +861,13 @@ int main()
 
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_DIREITA * 100, 56, 100, 150, 300, 123, 220, 0);
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_ESQUERDA * 100, 56, 100, 1010, 300, 123, 220, 0);
+
+                char texto_fim[60];
+                sprintf_s(texto_fim, sizeof(texto_fim), "Pontuacao: %d   Recorde: %d", pontos, hiscore);
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 265, ALLEGRO_ALIGN_CENTER, texto_fim);
+
+                if (novo_recorde)
+                    al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 290, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE!");
 
                 for (int k = 0; k < 2; k++)
                     desenhar_botao_menu(fonte, 540, 330 + k * 80, 740, 390 + k * 80, rotulos_fim[k], opcao_fim == k);
@@ -930,6 +994,12 @@ int main()
                     {
                         abrir_porta(porta_linha, porta_coluna);
                         perguntando = false;
+
+                        if (!porta_pontuada[porta_linha][porta_coluna])
+                        {
+                            porta_pontuada[porta_linha][porta_coluna] = true;
+                            pontos += 100;
+                        }
                     }
                     else
                     {
@@ -1051,6 +1121,10 @@ int main()
                     if (fechar_porta_aleatoria())
                         aviso_porta = 180;
 
+                    pontos -= 50;
+                    if (pontos < 0)
+                        pontos = 0;
+
                     conversando = false;
                     perguntando = false;
                     caderno_aberto = false;
@@ -1064,7 +1138,18 @@ int main()
             int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
 
             if (linha_atual == SAIDA_LINHA && coluna_atual == SAIDA_COLUNA)
+            {
+                pontos += 500;
+
+                if (pontos > hiscore)
+                {
+                    hiscore = pontos;
+                    novo_recorde = true;
+                    salvar_hiscore(hiscore);
+                }
+
                 fim_de_jogo = true;
+            }
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
             camera_y = personagem_y + CELL_H / 2 - 720 / 2;
@@ -1104,7 +1189,7 @@ int main()
             redesenhando = false;
 
             al_clear_to_color(al_map_rgb(20, 20, 20));
-            desenhar_mapa(camera_x, camera_y, tile_parede, tile_porta);
+            desenhar_mapa(camera_x, camera_y, tile_parede, tile_porta, tile_porta_saida);
 
             if (tem_professor)
             {
@@ -1153,6 +1238,10 @@ int main()
             al_draw_scaled_bitmap(personagem_sprites, quadro * 56, direcao * 100, 56, 100, personagem_x - camera_x + off_x, personagem_y - camera_y, larg, CELL_H, 0);
 
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
+
+            char texto_pontos[60];
+            sprintf_s(texto_pontos, sizeof(texto_pontos), "Pontos: %d   Recorde: %d", pontos, hiscore);
+            al_draw_text(fonte, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, texto_pontos);
 
             if (aviso_saida > 0)
                 al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "A porta da saida so abre depois que todas as outras portas estiverem abertas!");
@@ -1235,6 +1324,9 @@ int main()
 
     if (tem_professor)
         al_destroy_bitmap(prof_sprites);
+
+    if (tile_porta_saida != NULL)
+        al_destroy_bitmap(tile_porta_saida);
 
     al_destroy_bitmap(inspetor_sprites);
     al_destroy_bitmap(tile_porta);
