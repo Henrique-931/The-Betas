@@ -15,17 +15,20 @@
 #define CHAO 0
 #define PAREDE 1
 #define PORTA_FECHADA 2
+#define ESTANTE 3
+#define QUADRO 4
 #define QTD_PERGUNTAS 7
 #define QTD_FALAS 9
 #define QTD_INSPETORES 4
 #define PROF_COLUNAS 7
 #define PROF_LINHAS 4
 #define DISTANCIA_PROFESSOR 110
-#define SAIDA_LINHA 23
-#define SAIDA_COLUNA 34
 #define PONTOS_PORTA 100
 #define TEMPO_LIMITE 300
 #define PONTOS_SEGUNDO 5
+#define QTD_MAPAS 2
+#define TEMA_PEDRA 0
+#define TEMA_BIBLIOTECA 1
 
 enum { DIR_BAIXO, DIR_CIMA, DIR_ESQUERDA, DIR_DIREITA };
 
@@ -50,6 +53,27 @@ typedef struct
     bool andando;
 } Inspetor;
 
+typedef struct
+{
+    int (*dados)[COLUNAS];
+    int saida_linha, saida_coluna;
+    int insp_linha[QTD_INSPETORES];
+    int insp_coluna[QTD_INSPETORES];
+    int insp_dir[QTD_INSPETORES];
+    float prof_x, prof_y;
+    int tema;
+} InfoMapa;
+
+typedef struct
+{
+    ALLEGRO_BITMAP* parede;
+    ALLEGRO_BITMAP* porta;
+    ALLEGRO_BITMAP* porta_saida;
+    ALLEGRO_BITMAP* chao;
+    ALLEGRO_BITMAP* estante;
+    ALLEGRO_BITMAP* quadro;
+} Tema;
+
 Pergunta perguntas[QTD_PERGUNTAS] = {
     { "2x + 7 = 3x - 5", 12 },
     { "3(x - 2) + 5 = 2x + 7", 8 },
@@ -70,7 +94,7 @@ char falas[QTD_FALAS][200] = {
     "Com parenteses, multiplique primeiro: 3(x - 2) = 3x - 6. Com fracoes, multiplique tudo pelo denominador comum.",
     "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!" };
 
-int mapa[LINHAS][COLUNAS] = {
+int mapa1[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
     { 1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1 },
     { 1,0,1,1,1,1,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1 },
@@ -98,6 +122,57 @@ int mapa[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
 };
 
+int mapa2[LINHAS][COLUNAS] = {
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
+    { 1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
+    { 1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,2,1,1,1,1,1,0,1 },
+    { 1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,4,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1 },
+    { 1,1,1,1,1,1,1,1,1,0,3,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1 },
+    { 1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1 },
+    { 1,0,1,2,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,3,1,0,1,0,4,0,1,0,1,0,3,1,1,0,1 },
+    { 1,0,3,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1 },
+    { 1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1 },
+    { 1,0,1,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,3,0,0,0,0,0,1,0,0,0,0,0,0,0,4,0,1 },
+    { 1,0,1,4,1,0,1,0,1,1,1,1,3,0,1,0,1,0,1,0,1,1,1,0,1,1,1,1,1,1,1,0,1,0,1 },
+    { 1,0,1,0,0,0,1,0,0,0,0,0,1,0,4,0,1,0,1,0,0,0,1,0,1,0,0,0,0,0,3,0,0,0,1 },
+    { 1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1 },
+    { 1,0,1,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,0,0,1 },
+    { 1,2,1,0,1,0,1,1,1,0,1,3,1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,1,1 },
+    { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1 },
+    { 1,0,1,1,3,1,1,1,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1,0,1,0,1,1,1,0,1,0,1 },
+    { 1,0,0,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1,0,1 },
+    { 1,1,1,1,1,0,1,1,4,0,1,0,1,1,1,0,1,3,1,0,1,0,1,1,1,0,3,1,1,1,1,1,1,0,1 },
+    { 1,0,0,0,1,0,0,0,1,0,4,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,1 },
+    { 1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1 },
+    { 1,0,1,0,0,0,0,0,1,0,0,0,0,0,3,0,0,0,0,0,1,0,1,0,0,0,2,0,1,0,1,0,0,0,1 },
+    { 1,0,1,0,1,1,1,1,1,1,1,2,3,0,1,0,1,1,1,1,1,0,1,1,1,1,3,0,1,0,1,1,1,0,1 },
+    { 1,0,2,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,2 },
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
+};
+
+int mapa[LINHAS][COLUNAS];
+
+InfoMapa mapas[QTD_MAPAS] = {
+    {
+        mapa1, 23, 34,
+        { 7, 21, 1, 15 }, { 5, 29, 30, 4 }, { DIR_DIREITA, DIR_ESQUERDA, DIR_BAIXO, DIR_CIMA },
+        11 * TILE_SIZE + 6, 11 * TILE_SIZE + 5,
+        TEMA_PEDRA
+    },
+    {
+        mapa2, 23, 34,
+        { 23, 19, 13, 23 }, { 5, 17, 11, 25 }, { DIR_DIREITA, DIR_CIMA, DIR_BAIXO, DIR_ESQUERDA },
+        7 * TILE_SIZE + 6, 3 * TILE_SIZE + 5,
+        TEMA_BIBLIOTECA
+    }
+};
+
+int mapa_atual = 0;
+int saida_linha = 23;
+int saida_coluna = 34;
+float professor_x = 0;
+float professor_y = 0;
+
 int mapa_original[LINHAS][COLUNAS];
 
 Inspetor inspetores[QTD_INSPETORES];
@@ -106,7 +181,12 @@ int insp_x[7] = { 272, 477, 679, 879, 1081, 1289, 1493 };
 int insp_y[4] = { 17, 239, 458, 672 };
 int insp_h[4] = { 218, 219, 213, 207 };
 
-void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, ALLEGRO_BITMAP* tile_porta, ALLEGRO_BITMAP* tile_porta_saida)
+void desenhar_tile(ALLEGRO_BITMAP* img, float x, float y)
+{
+    al_draw_scaled_bitmap(img, 0, 0, al_get_bitmap_width(img), al_get_bitmap_height(img), x, y, TILE_SIZE, TILE_SIZE, 0);
+}
+
+void desenhar_mapa(float camera_x, float camera_y, const Tema* t)
 {
     for (int i = 0; i < LINHAS; i++)
     {
@@ -114,25 +194,38 @@ void desenhar_mapa(float camera_x, float camera_y, ALLEGRO_BITMAP* tile_parede, 
         {
             float x = j * TILE_SIZE - camera_x;
             float y = i * TILE_SIZE - camera_y;
+            int tipo = mapa[i][j];
 
-            if (mapa[i][j] == PAREDE)
-                al_draw_scaled_bitmap(tile_parede, 0, 0, al_get_bitmap_width(tile_parede), al_get_bitmap_height(tile_parede), x, y, TILE_SIZE, TILE_SIZE, 0);
-            else if (mapa[i][j] == PORTA_FECHADA)
+            if (tipo == PAREDE || tipo == ESTANTE || tipo == QUADRO)
             {
-                if (i == SAIDA_LINHA && j == SAIDA_COLUNA)
+                desenhar_tile(t->parede, x, y);
+
+                if (tipo == ESTANTE)
+                    desenhar_tile(t->estante, x, y);
+                else if (tipo == QUADRO)
+                    desenhar_tile(t->quadro, x, y);
+            }
+            else if (tipo == PORTA_FECHADA)
+            {
+                if (i == saida_linha && j == saida_coluna)
                 {
-                    if (tile_porta_saida != NULL)
-                        al_draw_scaled_bitmap(tile_porta_saida, 0, 0, al_get_bitmap_width(tile_porta_saida), al_get_bitmap_height(tile_porta_saida), x, y, TILE_SIZE, TILE_SIZE, 0);
+                    if (t->porta_saida != NULL)
+                        desenhar_tile(t->porta_saida, x, y);
                     else
-                        al_draw_tinted_scaled_bitmap(tile_porta, al_map_rgb(70, 130, 255), 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+                        al_draw_tinted_scaled_bitmap(t->porta, al_map_rgb(70, 130, 255), 0, 0, al_get_bitmap_width(t->porta), al_get_bitmap_height(t->porta), x, y, TILE_SIZE, TILE_SIZE, 0);
                 }
                 else
                 {
-                    al_draw_scaled_bitmap(tile_porta, 0, 0, al_get_bitmap_width(tile_porta), al_get_bitmap_height(tile_porta), x, y, TILE_SIZE, TILE_SIZE, 0);
+                    desenhar_tile(t->porta, x, y);
                 }
             }
             else
-                al_draw_filled_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180));
+            {
+                if (t->chao != NULL)
+                    desenhar_tile(t->chao, x, y);
+                else
+                    al_draw_filled_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180));
+            }
         }
     }
 }
@@ -151,7 +244,7 @@ bool pode_andar(float x, float y)
     {
         for (int coluna = esquerda; coluna <= direita; coluna++)
         {
-            if (mapa[linha][coluna] == PAREDE || mapa[linha][coluna] == PORTA_FECHADA)
+            if (mapa[linha][coluna] != CHAO)
                 return false;
         }
     }
@@ -311,16 +404,14 @@ bool bateu(float x1, float y1, float x2, float y2)
 
 void reiniciar_inspetores()
 {
-    int linhas_inicio[QTD_INSPETORES] = { 7, 21, 1, 15 };
-    int colunas_inicio[QTD_INSPETORES] = { 5, 29, 30, 4 };
-    int direcoes[QTD_INSPETORES] = { DIR_DIREITA, DIR_ESQUERDA, DIR_BAIXO, DIR_CIMA };
+    InfoMapa* m = &mapas[mapa_atual];
 
     for (int i = 0; i < QTD_INSPETORES; i++)
     {
-        inspetores[i].x = centro_x(colunas_inicio[i]);
-        inspetores[i].y = centro_y(linhas_inicio[i]);
+        inspetores[i].x = centro_x(m->insp_coluna[i]);
+        inspetores[i].y = centro_y(m->insp_linha[i]);
         inspetores[i].velocidade = 1.5;
-        inspetores[i].direcao = direcoes[i];
+        inspetores[i].direcao = m->insp_dir[i];
         inspetores[i].contador_animacao = 0;
         inspetores[i].destino_linha = -1;
         inspetores[i].destino_coluna = -1;
@@ -330,6 +421,24 @@ void reiniciar_inspetores()
         inspetores[i].tem_passo = false;
         inspetores[i].andando = false;
     }
+}
+
+void carregar_mapa(int indice)
+{
+    mapa_atual = indice;
+
+    for (int i = 0; i < LINHAS; i++)
+    {
+        for (int j = 0; j < COLUNAS; j++)
+            mapa[i][j] = mapas[indice].dados[i][j];
+    }
+
+    guardar_mapa();
+    saida_linha = mapas[indice].saida_linha;
+    saida_coluna = mapas[indice].saida_coluna;
+    professor_x = mapas[indice].prof_x;
+    professor_y = mapas[indice].prof_y;
+    reiniciar_inspetores();
 }
 
 bool escolher_destino(Inspetor* insp)
@@ -554,6 +663,21 @@ int main()
     if (!tile_parede) { printf("Erro: tileparede_mapa1.png\n"); return -1; }
     if (!tile_porta) { printf("Erro: porta_mapa.png\n"); return -1; }
 
+    ALLEGRO_BITMAP* esc_parede = al_load_bitmap("parede_escola.png");
+    ALLEGRO_BITMAP* esc_porta = al_load_bitmap("porta_escola.png");
+    ALLEGRO_BITMAP* esc_chao = al_load_bitmap("chao_biblioteca.png");
+    ALLEGRO_BITMAP* esc_estante = al_load_bitmap("estante_biblioteca.png");
+    ALLEGRO_BITMAP* esc_quadro = al_load_bitmap("deco_quadro.png");
+
+    if (!esc_parede) { printf("Erro: parede_escola.png\n"); return -1; }
+    if (!esc_porta) { printf("Erro: porta_escola.png\n"); return -1; }
+    if (!esc_chao) { printf("Erro: chao_biblioteca.png\n"); return -1; }
+    if (!esc_estante) { printf("Erro: estante_biblioteca.png\n"); return -1; }
+    if (!esc_quadro) { printf("Erro: deco_quadro.png\n"); return -1; }
+
+    Tema tema_pedra = { tile_parede, tile_porta, tile_porta_saida, NULL, NULL, NULL };
+    Tema tema_biblioteca = { esc_parede, esc_porta, NULL, esc_chao, esc_estante, esc_quadro };
+
     bool tem_professor = (prof_sprites != NULL);
     int prof_quadro_w = 1;
     int prof_quadro_h = 1;
@@ -570,11 +694,8 @@ int main()
 
     float prof_h = 55;
     float prof_w = prof_h * prof_quadro_w / prof_quadro_h;
-    float professor_x = 11 * TILE_SIZE + 6;
-    float professor_y = 11 * TILE_SIZE + 5;
 
-    guardar_mapa();
-    reiniciar_inspetores();
+    carregar_mapa(0);
 
     ALLEGRO_TIMER* fps = al_create_timer(1.0 / 60.0);
     ALLEGRO_EVENT_QUEUE* evento = al_create_event_queue();
@@ -620,6 +741,8 @@ int main()
     int tempo_jogo = 0;
     int portas_abertas = 0;
     int bonus_tempo = 0;
+    int pontos_acumulados = 0;
+    int aviso_mapa = 0;
 
     while (rodando)
     {
@@ -788,8 +911,9 @@ int main()
             {
                 if (opcao_fim == 0)
                 {
-                    reiniciar_mapa();
-                    reiniciar_inspetores();
+                    carregar_mapa(0);
+                    pontos_acumulados = 0;
+                    aviso_mapa = 0;
 
                     personagem_x = 80;
                     personagem_y = 60;
@@ -1134,7 +1258,7 @@ int main()
             int coluna_atual = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
             int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
 
-            if (linha_atual == SAIDA_LINHA && coluna_atual == SAIDA_COLUNA)
+            if (linha_atual == saida_linha && coluna_atual == saida_coluna)
             {
                 int segundos = tempo_jogo / 60;
 
@@ -1143,9 +1267,34 @@ int main()
                 if (bonus_tempo < 0)
                     bonus_tempo = 0;
 
-                pontos = portas_abertas * PONTOS_PORTA + bonus_tempo;
+                int pontos_mapa = portas_abertas * PONTOS_PORTA + bonus_tempo;
 
-                fim_de_jogo = true;
+                if (mapa_atual < QTD_MAPAS - 1)
+                {
+                    pontos_acumulados += pontos_mapa;
+                    carregar_mapa(mapa_atual + 1);
+
+                    personagem_x = 80;
+                    personagem_y = 60;
+                    direcao = DIR_BAIXO;
+                    andando = false;
+                    anim_andar = 0;
+                    conversando = false;
+                    perguntando = false;
+                    caderno_aberto = false;
+                    resposta[0] = '\0';
+                    tamanho_resposta = 0;
+                    mensagem[0] = '\0';
+                    tempo_jogo = 0;
+                    aviso_porta = 0;
+                    aviso_tempo = 0;
+                    aviso_mapa = 240;
+                }
+                else
+                {
+                    pontos = pontos_acumulados + pontos_mapa;
+                    fim_de_jogo = true;
+                }
             }
 
             camera_x = personagem_x + CELL_W / 2 - 1280 / 2;
@@ -1164,6 +1313,8 @@ int main()
                 aviso_porta--;
             if (aviso_tempo > 0)
                 aviso_tempo--;
+            if (aviso_mapa > 0)
+                aviso_mapa--;
 
             contador_anim++;
             if (contador_anim >= 30)
@@ -1186,7 +1337,8 @@ int main()
             redesenhando = false;
 
             al_clear_to_color(al_map_rgb(20, 20, 20));
-            desenhar_mapa(camera_x, camera_y, tile_parede, tile_porta, tile_porta_saida);
+            const Tema* tema_atual = (mapas[mapa_atual].tema == TEMA_BIBLIOTECA) ? &tema_biblioteca : &tema_pedra;
+            desenhar_mapa(camera_x, camera_y, tema_atual);
 
             if (tem_professor)
             {
@@ -1243,7 +1395,7 @@ int main()
             if (segundos_hud <= 30)
                 cor_hud = al_map_rgb(255, 80, 80);
 
-            sprintf_s(texto_hud, sizeof(texto_hud), "Portas: %d/%d   Tempo: %02d:%02d", contar_portas_abertas(), contar_portas_total(), segundos_hud / 60, segundos_hud % 60);
+            sprintf_s(texto_hud, sizeof(texto_hud), "Mapa %d/%d   Portas: %d/%d   Tempo: %02d:%02d", mapa_atual + 1, QTD_MAPAS, contar_portas_abertas(), contar_portas_total(), segundos_hud / 60, segundos_hud % 60);
             al_draw_text(fonte, cor_hud, 10, 10, ALLEGRO_ALIGN_LEFT, texto_hud);
 
             if (aviso_porta > 0)
@@ -1251,6 +1403,9 @@ int main()
 
             if (aviso_tempo > 0)
                 al_draw_text(fonte, al_map_rgb(255, 160, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU! As portas foram fechadas e a fase recomecou.");
+
+            if (aviso_mapa > 0)
+                al_draw_text(fonte, al_map_rgb(120, 220, 255), 640, 70, ALLEGRO_ALIGN_CENTER, "MAPA 2 - BIBLIOTECA");
 
             if (conversando && !perguntando)
             {
@@ -1331,6 +1486,11 @@ int main()
     if (tile_porta_saida != NULL)
         al_destroy_bitmap(tile_porta_saida);
 
+    al_destroy_bitmap(esc_quadro);
+    al_destroy_bitmap(esc_estante);
+    al_destroy_bitmap(esc_chao);
+    al_destroy_bitmap(esc_porta);
+    al_destroy_bitmap(esc_parede);
     al_destroy_bitmap(inspetor_sprites);
     al_destroy_bitmap(tile_porta);
     al_destroy_bitmap(tile_parede);

@@ -158,7 +158,13 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\..\..\..\..\Downloads\chao_biblioteca.png" />
+    <Image Include="..\..\..\..\..\Downloads\deco_planta.png" />
+    <Image Include="..\..\..\..\..\Downloads\deco_quadro.png" />
+    <Image Include="..\..\..\..\..\Downloads\estante_biblioteca.png" />
+    <Image Include="..\..\..\..\..\Downloads\parede_escola.png" />
     <Image Include="..\..\..\..\..\Downloads\personagem_sprite.png" />
+    <Image Include="..\..\..\..\..\Downloads\porta_escola.png" />
     <Image Include="..\..\..\..\..\Downloads\spriteprofessor.png" />
     <Image Include="..\..\..\The Betas\x64\Debug\Sprite_inspetor.png" />
   </ItemGroup>
