@@ -24,7 +24,7 @@
 #define SAIDA_LINHA 23
 #define SAIDA_COLUNA 34
 #define PONTOS_PORTA 100
-#define TEMPO_BONUS 300
+#define TEMPO_LIMITE 300
 #define PONTOS_SEGUNDO 5
 
 enum { DIR_BAIXO, DIR_CIMA, DIR_ESQUERDA, DIR_DIREITA };
@@ -615,6 +615,7 @@ int main()
     int opcao_fim = 0;
     int contador_fim = 0;
     int aviso_porta = 0;
+    int aviso_tempo = 0;
     int pontos = 0;
     int tempo_jogo = 0;
     int portas_abertas = 0;
@@ -734,6 +735,8 @@ int main()
                     al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 315, ALLEGRO_ALIGN_LEFT, "[E] Perto de uma porta: resolver a equacao para abri-la");
                     al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 355, ALLEGRO_ALIGN_LEFT, "[N] Abrir o caderno de anotacoes");
                     al_draw_text(fonte, al_map_rgb(255, 120, 120), 280, 405, ALLEGRO_ALIGN_LEFT, "Fuja dos inspetores! Se eles te pegarem, voce volta ao inicio.");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 445, ALLEGRO_ALIGN_LEFT, "Voce tem 5 minutos: se o tempo acabar, as portas fecham e a fase recomeca.");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 470, ALLEGRO_ALIGN_LEFT, "Pontos = portas abertas + bonus pelo tempo que sobrar.");
                     al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 535, ALLEGRO_ALIGN_CENTER, "Clique ou aperte [ENTER] para voltar");
                 }
 
@@ -804,6 +807,7 @@ int main()
                     mensagem[0] = '\0';
                     opcao_fim = 0;
                     aviso_porta = 0;
+                    aviso_tempo = 0;
                     pontos = 0;
                     tempo_jogo = 0;
                     portas_abertas = 0;
@@ -1103,18 +1107,39 @@ int main()
                 }
             }
 
-            int coluna_atual = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
-            int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
-
             if (!conversando && !caderno_aberto)
                 tempo_jogo++;
+
+            if (tempo_jogo >= TEMPO_LIMITE * 60)
+            {
+                reiniciar_mapa();
+                reiniciar_inspetores();
+
+                personagem_x = 80;
+                personagem_y = 60;
+                direcao = DIR_BAIXO;
+                andando = false;
+                anim_andar = 0;
+                conversando = false;
+                perguntando = false;
+                caderno_aberto = false;
+                resposta[0] = '\0';
+                tamanho_resposta = 0;
+                mensagem[0] = '\0';
+                tempo_jogo = 0;
+                aviso_porta = 0;
+                aviso_tempo = 240;
+            }
+
+            int coluna_atual = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
+            int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
 
             if (linha_atual == SAIDA_LINHA && coluna_atual == SAIDA_COLUNA)
             {
                 int segundos = tempo_jogo / 60;
 
                 portas_abertas = contar_portas_abertas();
-                bonus_tempo = (TEMPO_BONUS - segundos) * PONTOS_SEGUNDO;
+                bonus_tempo = (TEMPO_LIMITE - segundos) * PONTOS_SEGUNDO;
                 if (bonus_tempo < 0)
                     bonus_tempo = 0;
 
@@ -1137,6 +1162,8 @@ int main()
 
             if (aviso_porta > 0)
                 aviso_porta--;
+            if (aviso_tempo > 0)
+                aviso_tempo--;
 
             contador_anim++;
             if (contador_anim >= 30)
@@ -1210,12 +1237,20 @@ int main()
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
 
             char texto_hud[80];
-            int segundos_hud = tempo_jogo / 60;
+            int segundos_hud = TEMPO_LIMITE - tempo_jogo / 60;
+            ALLEGRO_COLOR cor_hud = al_map_rgb(255, 255, 255);
+
+            if (segundos_hud <= 30)
+                cor_hud = al_map_rgb(255, 80, 80);
+
             sprintf_s(texto_hud, sizeof(texto_hud), "Portas: %d/%d   Tempo: %02d:%02d", contar_portas_abertas(), contar_portas_total(), segundos_hud / 60, segundos_hud % 60);
-            al_draw_text(fonte, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, texto_hud);
+            al_draw_text(fonte, cor_hud, 10, 10, ALLEGRO_ALIGN_LEFT, texto_hud);
 
             if (aviso_porta > 0)
                 al_draw_text(fonte, al_map_rgb(255, 120, 120), 640, 20, ALLEGRO_ALIGN_CENTER, "O inspetor te pegou e fechou uma porta do labirinto!");
+
+            if (aviso_tempo > 0)
+                al_draw_text(fonte, al_map_rgb(255, 160, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU! As portas foram fechadas e a fase recomecou.");
 
             if (conversando && !perguntando)
             {
