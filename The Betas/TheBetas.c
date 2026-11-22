@@ -23,6 +23,9 @@
 #define DISTANCIA_PROFESSOR 110
 #define SAIDA_LINHA 23
 #define SAIDA_COLUNA 34
+#define PONTOS_PORTA 100
+#define TEMPO_LIMITE 300
+#define PONTOS_SEGUNDO 5
 
 enum { DIR_BAIXO, DIR_CIMA, DIR_ESQUERDA, DIR_DIREITA };
 
@@ -85,7 +88,7 @@ int mapa[LINHAS][COLUNAS] = {
     { 1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1 },
     { 1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,1 },
     { 1,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,2,1,0,1,1,1,1,1,0,1,0,1 },
-    { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1 },
+    { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1 },
     { 1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1 },
     { 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1 },
     { 1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1 },
@@ -202,48 +205,36 @@ bool fechar_porta_aleatoria()
     return true;
 }
 
-bool outras_portas_abertas()
+int contar_portas_total()
 {
+    int total = 0;
+
     for (int i = 0; i < LINHAS; i++)
     {
         for (int j = 0; j < COLUNAS; j++)
         {
-            if (i == SAIDA_LINHA && j == SAIDA_COLUNA)
-                continue;
-
-            if (mapa[i][j] == PORTA_FECHADA)
-                return false;
+            if (mapa_original[i][j] == PORTA_FECHADA)
+                total++;
         }
     }
 
-    return true;
+    return total;
 }
 
-int carregar_hiscore()
+int contar_portas_abertas()
 {
-    int valor = 0;
-    FILE* arq = NULL;
+    int abertas = 0;
 
-    fopen_s(&arq, "hiscore.txt", "r");
-    if (arq != NULL)
+    for (int i = 0; i < LINHAS; i++)
     {
-        fscanf_s(arq, "%d", &valor);
-        fclose(arq);
+        for (int j = 0; j < COLUNAS; j++)
+        {
+            if (mapa_original[i][j] == PORTA_FECHADA && mapa[i][j] == CHAO)
+                abertas++;
+        }
     }
 
-    return valor;
-}
-
-void salvar_hiscore(int valor)
-{
-    FILE* arq = NULL;
-
-    fopen_s(&arq, "hiscore.txt", "w");
-    if (arq != NULL)
-    {
-        fprintf(arq, "%d", valor);
-        fclose(arq);
-    }
+    return abertas;
 }
 
 bool clicou(float mx, float my, float x1, float y1, float x2, float y2)
@@ -624,11 +615,11 @@ int main()
     int opcao_fim = 0;
     int contador_fim = 0;
     int aviso_porta = 0;
-    int aviso_saida = 0;
+    int aviso_tempo = 0;
     int pontos = 0;
-    int hiscore = carregar_hiscore();
-    bool novo_recorde = false;
-    bool porta_pontuada[LINHAS][COLUNAS] = { 0 };
+    int tempo_jogo = 0;
+    int portas_abertas = 0;
+    int bonus_tempo = 0;
 
     while (rodando)
     {
@@ -724,10 +715,6 @@ int main()
                 desenhar_texto_grande(fonte, al_map_rgb(255, 220, 60), 640, 110, 10, "THE BETAS");
                 desenhar_texto_grande(fonte, al_map_rgb(200, 200, 200), 640, 220, 2, "Resolva as equacoes e escape do labirinto!");
 
-                char texto_recorde[40];
-                sprintf_s(texto_recorde, sizeof(texto_recorde), "Recorde: %d", hiscore);
-                al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 270, ALLEGRO_ALIGN_CENTER, texto_recorde);
-
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_menu / 8) % 4) * 56, DIR_BAIXO * 100, 56, 100, 150, 300, 123, 220, 0);
                 al_draw_scaled_bitmap(inspetor_sprites, insp_x[coluna] - 75, insp_y[linha], 150, insp_h[linha], 1010, 300 + 220 - altura, 148, altura, 0);
 
@@ -748,6 +735,8 @@ int main()
                     al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 315, ALLEGRO_ALIGN_LEFT, "[E] Perto de uma porta: resolver a equacao para abri-la");
                     al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 355, ALLEGRO_ALIGN_LEFT, "[N] Abrir o caderno de anotacoes");
                     al_draw_text(fonte, al_map_rgb(255, 120, 120), 280, 405, ALLEGRO_ALIGN_LEFT, "Fuja dos inspetores! Se eles te pegarem, voce volta ao inicio.");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 445, ALLEGRO_ALIGN_LEFT, "Voce tem 5 minutos: se o tempo acabar, as portas fecham e a fase recomeca.");
+                    al_draw_text(fonte, al_map_rgb(255, 255, 255), 280, 470, ALLEGRO_ALIGN_LEFT, "Pontos = portas abertas + bonus pelo tempo que sobrar.");
                     al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 535, ALLEGRO_ALIGN_CENTER, "Clique ou aperte [ENTER] para voltar");
                 }
 
@@ -818,16 +807,11 @@ int main()
                     mensagem[0] = '\0';
                     opcao_fim = 0;
                     aviso_porta = 0;
-                    aviso_saida = 0;
+                    aviso_tempo = 0;
                     pontos = 0;
-                    novo_recorde = false;
-
-                    for (int i = 0; i < LINHAS; i++)
-                    {
-                        for (int j = 0; j < COLUNAS; j++)
-                            porta_pontuada[i][j] = false;
-                    }
-
+                    tempo_jogo = 0;
+                    portas_abertas = 0;
+                    bonus_tempo = 0;
                     fim_de_jogo = false;
                 }
                 else
@@ -862,12 +846,18 @@ int main()
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_DIREITA * 100, 56, 100, 150, 300, 123, 220, 0);
                 al_draw_scaled_bitmap(personagem_sprites, ((contador_fim / 8) % 4) * 56, DIR_ESQUERDA * 100, 56, 100, 1010, 300, 123, 220, 0);
 
+                char texto_portas[60];
+                char texto_tempo[60];
                 char texto_fim[60];
-                sprintf_s(texto_fim, sizeof(texto_fim), "Pontuacao: %d   Recorde: %d", pontos, hiscore);
-                al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 265, ALLEGRO_ALIGN_CENTER, texto_fim);
+                int segundos_fim = TEMPO_LIMITE - tempo_jogo / 60;
 
-                if (novo_recorde)
-                    al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 290, ALLEGRO_ALIGN_CENTER, "NOVO RECORDE!");
+                sprintf_s(texto_portas, sizeof(texto_portas), "Portas abertas: %d/%d  (+%d)", portas_abertas, contar_portas_total(), portas_abertas * PONTOS_PORTA);
+                sprintf_s(texto_tempo, sizeof(texto_tempo), "Tempo restante: %02d:%02d  (+%d)", segundos_fim / 60, segundos_fim % 60, bonus_tempo);
+                sprintf_s(texto_fim, sizeof(texto_fim), "Pontuacao total: %d", pontos);
+
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 248, ALLEGRO_ALIGN_CENTER, texto_portas);
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 264, ALLEGRO_ALIGN_CENTER, texto_tempo);
+                al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 284, ALLEGRO_ALIGN_CENTER, texto_fim);
 
                 for (int k = 0; k < 2; k++)
                     desenhar_botao_menu(fonte, 540, 330 + k * 80, 740, 390 + k * 80, rotulos_fim[k], opcao_fim == k);
@@ -994,12 +984,6 @@ int main()
                     {
                         abrir_porta(porta_linha, porta_coluna);
                         perguntando = false;
-
-                        if (!porta_pontuada[porta_linha][porta_coluna])
-                        {
-                            porta_pontuada[porta_linha][porta_coluna] = true;
-                            pontos += 100;
-                        }
                     }
                     else
                     {
@@ -1074,20 +1058,13 @@ int main()
                             {
                                 if (mapa[i][j] == PORTA_FECHADA)
                                 {
-                                    if (i == SAIDA_LINHA && j == SAIDA_COLUNA && !outras_portas_abertas())
-                                    {
-                                        aviso_saida = 180;
-                                    }
-                                    else
-                                    {
-                                        porta_linha = i;
-                                        porta_coluna = j;
-                                        perguntando = true;
-                                        pergunta_atual = rand() % QTD_PERGUNTAS;
-                                        resposta[0] = '\0';
-                                        tamanho_resposta = 0;
-                                        mensagem[0] = '\0';
-                                    }
+                                    porta_linha = i;
+                                    porta_coluna = j;
+                                    perguntando = true;
+                                    pergunta_atual = rand() % QTD_PERGUNTAS;
+                                    resposta[0] = '\0';
+                                    tamanho_resposta = 0;
+                                    mensagem[0] = '\0';
                                 }
                             }
                         }
@@ -1121,10 +1098,6 @@ int main()
                     if (fechar_porta_aleatoria())
                         aviso_porta = 180;
 
-                    pontos -= 50;
-                    if (pontos < 0)
-                        pontos = 0;
-
                     conversando = false;
                     perguntando = false;
                     caderno_aberto = false;
@@ -1134,19 +1107,43 @@ int main()
                 }
             }
 
+            if (!conversando && !caderno_aberto)
+                tempo_jogo++;
+
+            if (tempo_jogo >= TEMPO_LIMITE * 60)
+            {
+                reiniciar_mapa();
+                reiniciar_inspetores();
+
+                personagem_x = 80;
+                personagem_y = 60;
+                direcao = DIR_BAIXO;
+                andando = false;
+                anim_andar = 0;
+                conversando = false;
+                perguntando = false;
+                caderno_aberto = false;
+                resposta[0] = '\0';
+                tamanho_resposta = 0;
+                mensagem[0] = '\0';
+                tempo_jogo = 0;
+                aviso_porta = 0;
+                aviso_tempo = 240;
+            }
+
             int coluna_atual = (int)(personagem_x + CELL_W / 2) / TILE_SIZE;
             int linha_atual = (int)(personagem_y + CELL_H / 2) / TILE_SIZE;
 
             if (linha_atual == SAIDA_LINHA && coluna_atual == SAIDA_COLUNA)
             {
-                pontos += 500;
+                int segundos = tempo_jogo / 60;
 
-                if (pontos > hiscore)
-                {
-                    hiscore = pontos;
-                    novo_recorde = true;
-                    salvar_hiscore(hiscore);
-                }
+                portas_abertas = contar_portas_abertas();
+                bonus_tempo = (TEMPO_LIMITE - segundos) * PONTOS_SEGUNDO;
+                if (bonus_tempo < 0)
+                    bonus_tempo = 0;
+
+                pontos = portas_abertas * PONTOS_PORTA + bonus_tempo;
 
                 fim_de_jogo = true;
             }
@@ -1165,8 +1162,8 @@ int main()
 
             if (aviso_porta > 0)
                 aviso_porta--;
-            if (aviso_saida > 0)
-                aviso_saida--;
+            if (aviso_tempo > 0)
+                aviso_tempo--;
 
             contador_anim++;
             if (contador_anim >= 30)
@@ -1239,15 +1236,21 @@ int main()
 
             al_draw_text(fonte, al_map_rgb(255, 255, 255), 1270, 10, ALLEGRO_ALIGN_RIGHT, "[N] Caderno");
 
-            char texto_pontos[60];
-            sprintf_s(texto_pontos, sizeof(texto_pontos), "Pontos: %d   Recorde: %d", pontos, hiscore);
-            al_draw_text(fonte, al_map_rgb(255, 255, 255), 10, 10, ALLEGRO_ALIGN_LEFT, texto_pontos);
+            char texto_hud[80];
+            int segundos_hud = TEMPO_LIMITE - tempo_jogo / 60;
+            ALLEGRO_COLOR cor_hud = al_map_rgb(255, 255, 255);
 
-            if (aviso_saida > 0)
-                al_draw_text(fonte, al_map_rgb(255, 220, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "A porta da saida so abre depois que todas as outras portas estiverem abertas!");
+            if (segundos_hud <= 30)
+                cor_hud = al_map_rgb(255, 80, 80);
+
+            sprintf_s(texto_hud, sizeof(texto_hud), "Portas: %d/%d   Tempo: %02d:%02d", contar_portas_abertas(), contar_portas_total(), segundos_hud / 60, segundos_hud % 60);
+            al_draw_text(fonte, cor_hud, 10, 10, ALLEGRO_ALIGN_LEFT, texto_hud);
 
             if (aviso_porta > 0)
                 al_draw_text(fonte, al_map_rgb(255, 120, 120), 640, 20, ALLEGRO_ALIGN_CENTER, "O inspetor te pegou e fechou uma porta do labirinto!");
+
+            if (aviso_tempo > 0)
+                al_draw_text(fonte, al_map_rgb(255, 160, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU! As portas foram fechadas e a fase recomecou.");
 
             if (conversando && !perguntando)
             {
