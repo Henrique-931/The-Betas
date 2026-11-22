@@ -74,16 +74,26 @@ typedef struct
     ALLEGRO_BITMAP* quadro;
 } Tema;
 
-Pergunta perguntas[QTD_PERGUNTAS] = {
+Pergunta perguntas[QTD_MAPAS][QTD_PERGUNTAS] = {
+{
     { "2x + 7 = 3x - 5", 12 },
     { "3(x - 2) + 5 = 2x + 7", 8 },
     { "5(x + 2) - 3x = 4x - 10", 10 },
     { "6x - 9 = 2x + 15", 6 },
     { "4(2x - 3) = 3(x + 6) - 5", 5 },
     { "7x - 4 = 2x - 24", -4 },
-    { "2(x + 3) = x + 11", 5 }, };
+    { "2(x + 3) = x + 11", 5 } },
+{
+    { "x^2 - 5x + 6 = 0  (calcule o delta)", 1 },
+    { "3x^2 - 3x - 10 = 0  (calcule o delta)", 129 },
+    { "x^2 + 4x + 5 = 0  (calcule o delta)", -4 },
+    { "2x^2 + 5x + 2 = 0 (calcule o delta)", 9 },
+    { "Calcule y = x^2 - 3x + 2 para x = 4", 6 },
+    { "Calcule y = 2x^2 - 5x + 1 para x = -2", 19 },
+    { "Calcule y = x^2 + 4x - 12 para x = 3", 9 } } };
 
-char falas[QTD_FALAS][200] = {
+char falas[QTD_MAPAS][QTD_FALAS][200] = {
+{
     "Ola, aluno! Eu sou o Professor. Fique por perto: vou te ensinar o basico para abrir as portas deste labirinto.",
     "Uma equacao do 1o grau tem uma letra, o x, chamada de incognita. Resolver a equacao e descobrir quanto vale esse x.",
     "Pense numa balanca: os dois lados do sinal de = precisam ficar equilibrados. Tudo o que voce fizer de um lado, faca do outro.",
@@ -92,7 +102,17 @@ char falas[QTD_FALAS][200] = {
     "Exemplo 2: 3x - 4 = 11. Passo o 4 somando: 3x = 15. O 3 multiplica, entao passa dividindo: x = 15 / 3 = 5.",
     "Com x dos dois lados, junte os x de um lado e os numeros do outro. Ex: 5x - 3 = 2x + 9 -> 3x = 12 -> x = 4.",
     "Com parenteses, multiplique primeiro: 3(x - 2) = 3x - 6. Com fracoes, multiplique tudo pelo denominador comum.",
-    "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!" };
+    "Dica final: depois de achar o x, troque ele na equacao para conferir. Se os dois lados derem igual, voce acertou! Boa sorte!" },
+{
+    "Bem-vindo a biblioteca! Agora as portas pedem equacoes do 2o grau. Eu sou o Professor e vou te mostrar o que voce precisa saber.",
+    "Equacao do 2o grau: ax^2 + bx + c = 0, com a diferente de 0. Os numeros a, b e c sao os coeficientes. Ex: x^2 - 5x + 6 = 0 tem a = 1, b = -5 e c = 6.",
+    "Para achar a, b e c, deixe tudo de um lado e zero do outro. Ex: x^2 = 4x + 21 vira x^2 - 4x - 21 = 0, entao a = 1, b = -4 e c = -21. Atencao ao sinal!",
+    "O delta e calculado assim: delta = b^2 - 4ac. Primeiro eleve o b ao quadrado, depois calcule 4 vezes a vezes c e subtraia um do outro.",
+    "Ex: x^2 - 3x - 10 = 0. a = 1, b = -3, c = -10. Delta = (-3)^2 - 4(1)(-10) = 9 + 40 = 49. Cuidado: (-3)^2 = 9, nao -9, e menos com menos vira mais!",
+    "Delta positivo: 2 raizes. Delta zero: 1 raiz. Delta negativo: nenhuma raiz real. Ex: x^2 + 4x + 5 = 0 -> delta = 16 - 20 = -4, entao nao tem raiz real.",
+    "Outras portas pedem so para substituir o x. Ex: y = x^2 - 3x + 2 para x = 4. Troque o x por 4: 4^2 - 3(4) + 2 = 16 - 12 + 2 = 6.",
+    "Com x negativo, use parenteses! Ex: y = 2x^2 - 5x + 1 para x = -2 -> 2(-2)^2 - 5(-2) + 1 = 2(4) + 10 + 1 = 19. Lembre: (-2)^2 = 4.",
+    "Dica final: va com calma, faca a conta passo a passo e confira os sinais. Se a porta pedir o delta, use b^2 - 4ac. Se pedir para substituir, troque o x. Boa sorte!" } };
 
 int mapa1[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
@@ -124,11 +144,11 @@ int mapa1[LINHAS][COLUNAS] = {
 
 int mapa2[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
-    { 1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
+    { 1,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
     { 1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,2,1,1,1,1,1,0,1 },
     { 1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,4,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1 },
     { 1,1,1,1,1,1,1,1,1,0,3,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1 },
-    { 1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1 },
+    { 1,0,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1 },
     { 1,0,1,2,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,3,1,0,1,0,4,0,1,0,1,0,3,1,1,0,1 },
     { 1,0,3,0,1,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1 },
     { 1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1 },
@@ -146,7 +166,7 @@ int mapa2[LINHAS][COLUNAS] = {
     { 1,0,1,1,1,1,1,0,1,0,1,1,1,1,1,1,1,1,1,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1 },
     { 1,0,1,0,0,0,0,0,1,0,0,0,0,0,3,0,0,0,0,0,1,0,1,0,0,0,2,0,1,0,1,0,0,0,1 },
     { 1,0,1,0,1,1,1,1,1,1,1,2,3,0,1,0,1,1,1,1,1,0,1,1,1,1,3,0,1,0,1,1,1,0,1 },
-    { 1,0,2,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,2 },
+    { 1,0,2,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,2 },
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
 };
 
@@ -162,7 +182,7 @@ InfoMapa mapas[QTD_MAPAS] = {
     {
         mapa2, 23, 34,
         { 23, 19, 13, 23 }, { 5, 17, 11, 25 }, { DIR_DIREITA, DIR_CIMA, DIR_BAIXO, DIR_ESQUERDA },
-        7 * TILE_SIZE + 6, 3 * TILE_SIZE + 5,
+        4 * TILE_SIZE + 6, 1 * TILE_SIZE + 5,
         TEMA_BIBLIOTECA
     }
 };
@@ -1006,6 +1026,29 @@ int main()
 
         if (ev.type == ALLEGRO_EVENT_KEY_DOWN)
         {
+            if (ev.keyboard.keycode == ALLEGRO_KEY_F12)
+            {
+                carregar_mapa((mapa_atual + 1) % QTD_MAPAS);
+                personagem_x = 80;
+                personagem_y = 60;
+                direcao = DIR_BAIXO;
+                andando = false;
+                anim_andar = 0;
+                tempo_jogo = 0;
+                conversando = false;
+                perguntando = false;
+                caderno_aberto = false;
+                pagina_fala = 0;
+                pagina_caderno = 0;
+                falas_lidas = 0;
+                resposta[0] = '\0';
+                tamanho_resposta = 0;
+                mensagem[0] = '\0';
+                aviso_porta = 0;
+                aviso_tempo = 0;
+                aviso_mapa = 0;
+            }
+
             if (ev.keyboard.keycode == ALLEGRO_KEY_N && conversando == false)
             {
                 if (caderno_aberto)
@@ -1104,7 +1147,7 @@ int main()
             {
                 if (tamanho_resposta > 0 && !(tamanho_resposta == 1 && resposta[0] == '-'))
                 {
-                    if (atoi(resposta) == perguntas[pergunta_atual].resposta)
+                    if (atoi(resposta) == perguntas[mapa_atual][pergunta_atual].resposta)
                     {
                         abrir_porta(porta_linha, porta_coluna);
                         perguntando = false;
@@ -1289,6 +1332,9 @@ int main()
                     aviso_porta = 0;
                     aviso_tempo = 0;
                     aviso_mapa = 240;
+                    pagina_fala = 0;
+                    pagina_caderno = 0;
+                    falas_lidas = 0;
                 }
                 else
                 {
@@ -1414,7 +1460,7 @@ int main()
                 al_draw_filled_rectangle(140, 570, 1140, 700, al_map_rgb(35, 35, 45));
                 al_draw_rectangle(140, 570, 1140, 700, al_map_rgb(220, 220, 220), 2);
                 al_draw_text(fonte, al_map_rgb(255, 255, 0), 160, 585, ALLEGRO_ALIGN_LEFT, "PROFESSOR");
-                al_draw_multiline_text(fonte, al_map_rgb(255, 255, 255), 160, 610, 960, 14, ALLEGRO_ALIGN_LEFT, falas[pagina_fala]);
+                al_draw_multiline_text(fonte, al_map_rgb(255, 255, 255), 160, 610, 960, 14, ALLEGRO_ALIGN_LEFT, falas[mapa_atual][pagina_fala]);
 
                 sprintf_s(numero_pagina, sizeof(numero_pagina), "%d/%d", pagina_fala + 1, QTD_FALAS);
 
@@ -1429,8 +1475,8 @@ int main()
                 al_draw_rectangle(300, 150, 980, 570, al_map_rgb(220, 220, 220), 2);
 
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 170, ALLEGRO_ALIGN_CENTER, "PORTA BLOQUEADA - RESOLVA A EQUACAO");
-                al_draw_text(fonte, al_map_rgb(255, 255, 0), 640, 205, ALLEGRO_ALIGN_CENTER, perguntas[pergunta_atual].enunciado);
-                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, "Qual o valor de x?");
+                al_draw_text(fonte, al_map_rgb(255, 255, 0), 640, 205, ALLEGRO_ALIGN_CENTER, perguntas[mapa_atual][pergunta_atual].enunciado);
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, (mapa_atual == 0) ? "Qual o valor de x?" : "Qual o resultado?");
 
                 al_draw_filled_rectangle(380, 240, 900, 280, al_map_rgb(15, 15, 20));
                 al_draw_rectangle(380, 240, 900, 280, al_map_rgb(180, 180, 180), 2);
@@ -1470,7 +1516,7 @@ int main()
                 {
                     sprintf_s(titulo_nota, sizeof(titulo_nota), "Anotacao %d de %d", pagina_caderno + 1, falas_lidas);
                     al_draw_text(fonte, al_map_rgb(150, 40, 40), 280, 165, ALLEGRO_ALIGN_LEFT, titulo_nota);
-                    al_draw_multiline_text(fonte, al_map_rgb(40, 30, 20), 280, 200, 720, 16, ALLEGRO_ALIGN_LEFT, falas[pagina_caderno]);
+                    al_draw_multiline_text(fonte, al_map_rgb(40, 30, 20), 280, 200, 720, 16, ALLEGRO_ALIGN_LEFT, falas[mapa_atual][pagina_caderno]);
                 }
 
                 al_draw_text(fonte, al_map_rgb(110, 70, 30), 640, 590, ALLEGRO_ALIGN_CENTER, "[<] [>] Trocar anotacao   [N] ou [ESC] Fechar");
