@@ -30,5 +30,23 @@
     <Image Include="..\..\..\..\..\Downloads\personagem_sprite.png">
       <Filter>Arquivos de Recurso</Filter>
     </Image>
+    <Image Include="..\..\..\..\..\Downloads\deco_quadro.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\deco_planta.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\parede_escola.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\porta_escola.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\estante_biblioteca.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
+    <Image Include="..\..\..\..\..\Downloads\chao_biblioteca.png">
+      <Filter>Arquivos de Recurso</Filter>
+    </Image>
   </ItemGroup>
 </Project>
