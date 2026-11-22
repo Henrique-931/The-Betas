@@ -88,7 +88,7 @@ int mapa[LINHAS][COLUNAS] = {
     { 1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1 },
     { 1,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,1 },
     { 1,0,1,0,1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,2,1,0,1,1,1,1,1,0,1,0,1 },
-    { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1 },
+    { 1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1 },
     { 1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,1,1,0,1 },
     { 1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1 },
     { 1,0,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1 },
@@ -849,10 +849,10 @@ int main()
                 char texto_portas[60];
                 char texto_tempo[60];
                 char texto_fim[60];
-                int segundos_fim = tempo_jogo / 60;
+                int segundos_fim = TEMPO_LIMITE - tempo_jogo / 60;
 
                 sprintf_s(texto_portas, sizeof(texto_portas), "Portas abertas: %d/%d  (+%d)", portas_abertas, contar_portas_total(), portas_abertas * PONTOS_PORTA);
-                sprintf_s(texto_tempo, sizeof(texto_tempo), "Tempo: %02d:%02d  (+%d)", segundos_fim / 60, segundos_fim % 60, bonus_tempo);
+                sprintf_s(texto_tempo, sizeof(texto_tempo), "Tempo restante: %02d:%02d  (+%d)", segundos_fim / 60, segundos_fim % 60, bonus_tempo);
                 sprintf_s(texto_fim, sizeof(texto_fim), "Pontuacao total: %d", pontos);
 
                 al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 248, ALLEGRO_ALIGN_CENTER, texto_portas);
