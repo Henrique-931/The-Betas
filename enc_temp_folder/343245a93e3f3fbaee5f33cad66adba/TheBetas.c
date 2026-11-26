@@ -26,9 +26,10 @@
 #define PONTOS_PORTA 100
 #define TEMPO_LIMITE 300
 #define PONTOS_SEGUNDO 5
-#define QTD_MAPAS 2
+#define QTD_MAPAS 3
 #define TEMA_PEDRA 0
 #define TEMA_BIBLIOTECA 1
+#define TEMA_LABORATORIO 2
 
 enum { DIR_BAIXO, DIR_CIMA, DIR_ESQUERDA, DIR_DIREITA };
 
@@ -72,6 +73,7 @@ typedef struct
     ALLEGRO_BITMAP* chao;
     ALLEGRO_BITMAP* estante;
     ALLEGRO_BITMAP* quadro;
+    ALLEGRO_BITMAP* chao2;
 } Tema;
 
 Pergunta perguntas[QTD_MAPAS][QTD_PERGUNTAS] = {
@@ -90,7 +92,15 @@ Pergunta perguntas[QTD_MAPAS][QTD_PERGUNTAS] = {
     { "2x^2 + 5x + 2 = 0 (calcule o delta)", 9 },
     { "x^2 - 3x + 2 para x = 4", 6 },
     { "2x^2 - 5x + 1 para x = -2", 19 },
-    { "x^2 + 4x - 12 para x = 3", 9 } } };
+    { "x^2 + 4x - 12 para x = 3", 9 } },
+{
+    { "25% de 200", 50 },
+    { "40% de 50", 20 },
+    { "Produto de 80 reais com aumento de 25%: novo preco?", 100 },
+    { "Camisa de 120 reais com desconto de 15%: preco final?", 102 },
+    { "log base 2 de 32", 5 },
+    { "log base 3 de 81", 4 },
+    { "log base 10 de 1000", 3 } } };
 
 char falas[QTD_MAPAS][QTD_FALAS][200] = {
 {
@@ -112,7 +122,17 @@ char falas[QTD_MAPAS][QTD_FALAS][200] = {
     "Delta positivo: 2 raizes. Delta zero: 1 raiz. Delta negativo: nenhuma raiz real. Ex: x^2 + 4x + 5 = 0 -> delta = 16 - 20 = -4, entao nao tem raiz real.",
     "Outras portas pedem so para substituir o x. Ex: y = x^2 - 3x + 2 para x = 4. Troque o x por 4: 4^2 - 3(4) + 2 = 16 - 12 + 2 = 6.",
     "Com x negativo, use parenteses! Ex: y = 2x^2 - 5x + 1 para x = -2 -> 2(-2)^2 - 5(-2) + 1 = 2(4) + 10 + 1 = 19. Lembre: (-2)^2 = 4.",
-    "Dica final: va com calma, faca a conta passo a passo e confira os sinais. Se a porta pedir o delta, use b^2 - 4ac. Se pedir para substituir, troque o x. Boa sorte!" } };
+    "Dica final: va com calma, faca a conta passo a passo e confira os sinais. Se a porta pedir o delta, use b^2 - 4ac. Se pedir para substituir, troque o x. Boa sorte!" },
+{
+    "Bem-vindo ao laboratorio! Aqui as portas misturam dois assuntos: porcentagem e logaritmo. Vou te ensinar os dois, comecando pela porcentagem.",
+    "Porcentagem significa 'por cem'. 25% e o mesmo que 25/100 = 0,25. Para achar uma porcentagem de um numero, multiplique. Ex: 25% de 200 = 0,25 x 200 = 50.",
+    "Truque de cabeca: 10% e dividir por 10, 50% e a metade, 25% e a metade da metade. Ex: 40% de 50 -> 10% de 50 = 5, entao 40% = 4 x 5 = 20.",
+    "Aumento: calcule a porcentagem e SOME. Ex: 80 com aumento de 25%: 25% de 80 = 20, entao 80 + 20 = 100.",
+    "Desconto: calcule a porcentagem e SUBTRAIA. Ex: 120 com desconto de 15%: 10% = 12, 5% = 6, 15% = 18. Preco final: 120 - 18 = 102.",
+    "Agora o logaritmo! log base a de b e o expoente que voce poe no a para chegar no b. Ex: log base 2 de 8 = 3, porque 2^3 = 8.",
+    "Para resolver, pergunte: a que numero devo elevar a base para chegar la? Ex: log base 10 de 1000 = 3, porque 10 x 10 x 10 = 1000.",
+    "Mais um: log base 3 de 81. Faca as potencias de 3: 3, 9, 27, 81. Sao 4 passos, entao o logaritmo e 4. Para log base 2 de 32: 2, 4, 8, 16, 32 -> 5.",
+    "Dica final: porcentagem de aumento soma, desconto subtrai. No log, a base e o numero que voce multiplica por ele mesmo. Conte os passos! Boa sorte!" } };
 
 int mapa1[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
@@ -144,7 +164,7 @@ int mapa1[LINHAS][COLUNAS] = {
 
 int mapa2[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
-    { 1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
+    { 1,0,1,0,0,0,0,0,0,0,0,0,1,0,2,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
     { 1,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,1,1,1,1,0,1,0,1,1,1,2,1,1,1,1,1,0,1 },
     { 1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,4,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1 },
     { 1,1,1,1,1,1,1,1,1,0,3,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1 },
@@ -170,6 +190,34 @@ int mapa2[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
 };
 
+int mapa3[LINHAS][COLUNAS] = {
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,2,0,0,0,1,0,0,0,1 },
+    { 1,3,1,0,1,1,3,1,1,0,1,1,3,0,1,0,3,1,1,0,3,3,1,0,3,3,3,3,1,0,3,0,1,3,1 },
+    { 1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1 },
+    { 1,0,1,3,3,3,1,0,1,0,3,0,1,3,1,1,1,0,1,3,1,0,1,0,1,0,1,0,1,0,1,1,1,0,1 },
+    { 1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,1,0,1,0,0,0,1,0,1,0,2,0,1 },
+    { 1,3,1,0,1,1,1,0,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,3,1,0,1,1,1,0,1,0,3,3,1 },
+    { 1,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1 },
+    { 1,0,3,3,1,0,1,3,3,0,3,0,1,0,1,1,1,0,1,0,1,1,3,0,1,0,3,0,1,0,1,0,1,0,1 },
+    { 1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,2,0,1,0,0,0,1,0,0,0,1,0,1,0,1,0,1 },
+    { 1,0,1,0,1,3,1,0,1,0,1,0,3,1,1,0,1,0,3,1,1,0,1,1,3,0,1,0,1,0,1,1,3,0,1 },
+    { 1,0,1,0,1,0,2,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,1 },
+    { 1,0,1,0,1,0,1,3,1,0,1,1,1,0,1,0,3,0,1,0,1,0,3,3,1,0,1,0,3,0,1,0,1,3,1 },
+    { 1,0,0,0,1,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,0,0,1 },
+    { 1,0,3,0,1,0,1,0,1,0,3,3,1,1,1,1,1,0,1,0,1,0,1,0,1,0,1,0,1,1,3,0,1,0,1 },
+    { 1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,1,0,0,0,1,0,1 },
+    { 1,0,1,0,1,0,3,0,1,1,1,0,3,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,3,1,1,1,1,0,1 },
+    { 1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,1 },
+    { 1,0,1,0,1,0,1,1,1,0,1,1,1,1,3,0,1,0,1,3,3,1,1,0,1,0,1,3,1,1,1,0,1,0,1 },
+    { 1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1 },
+    { 1,0,1,1,1,1,3,1,1,0,1,0,1,1,1,1,1,2,1,0,3,0,1,0,1,0,1,0,1,0,1,3,3,0,1 },
+    { 1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1 },
+    { 1,0,3,0,1,3,1,1,1,0,1,0,1,0,1,1,1,0,1,3,3,0,1,0,3,1,3,2,1,3,1,0,3,0,1 },
+    { 1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,2 },
+    { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 }
+};
+
 int mapa[LINHAS][COLUNAS];
 
 InfoMapa mapas[QTD_MAPAS] = {
@@ -184,6 +232,12 @@ InfoMapa mapas[QTD_MAPAS] = {
         { 23, 19, 13, 23 }, { 5, 17, 11, 25 }, { DIR_DIREITA, DIR_CIMA, DIR_BAIXO, DIR_ESQUERDA },
         4 * TILE_SIZE + 6, 1 * TILE_SIZE + 5,
         TEMA_BIBLIOTECA
+    },
+    {
+        mapa3, 23, 34,
+        { 9, 13, 19, 23 }, { 23, 31, 17, 9 }, { DIR_BAIXO, DIR_ESQUERDA, DIR_CIMA, DIR_DIREITA },
+        3 * TILE_SIZE + 6, 1 * TILE_SIZE + 5,
+        TEMA_LABORATORIO
     }
 };
 
@@ -241,8 +295,13 @@ void desenhar_mapa(float camera_x, float camera_y, const Tema* t)
             }
             else
             {
-                if (t->chao != NULL)
-                    desenhar_tile(t->chao, x, y);
+                ALLEGRO_BITMAP* img_chao = t->chao;
+
+                if (t->chao2 != NULL && (i * 7 + j * 3) % 5 == 0)
+                    img_chao = t->chao2;
+
+                if (img_chao != NULL)
+                    desenhar_tile(img_chao, x, y);
                 else
                     al_draw_filled_rectangle(x, y, x + TILE_SIZE, y + TILE_SIZE, al_map_rgb(180, 180, 180));
             }
@@ -695,8 +754,23 @@ int main()
     if (!esc_estante) { printf("Erro: estante_biblioteca.png\n"); return -1; }
     if (!esc_quadro) { printf("Erro: deco_quadro.png\n"); return -1; }
 
-    Tema tema_pedra = { tile_parede, tile_porta, tile_porta_saida, NULL, NULL, NULL };
-    Tema tema_biblioteca = { esc_parede, esc_porta, NULL, esc_chao, esc_estante, esc_quadro };
+    ALLEGRO_BITMAP* lab_parede = al_load_bitmap("parede_laboratorio.png");
+    ALLEGRO_BITMAP* lab_bancada = al_load_bitmap("bancada_laboratorio.png");
+    ALLEGRO_BITMAP* lab_porta = al_load_bitmap("porta_laboratorio.png");
+    ALLEGRO_BITMAP* lab_porta_saida = al_load_bitmap("porta_saida_laboratorio.png");
+    ALLEGRO_BITMAP* lab_chao = al_load_bitmap("chao_laboratorio.png");
+    ALLEGRO_BITMAP* lab_chao2 = al_load_bitmap("chao_laboratorio2.png");
+
+    if (!lab_parede) { printf("Erro: parede_laboratorio.png\n"); return -1; }
+    if (!lab_bancada) { printf("Erro: bancada_laboratorio.png\n"); return -1; }
+    if (!lab_porta) { printf("Erro: porta_laboratorio.png\n"); return -1; }
+    if (!lab_porta_saida) { printf("Erro: porta_saida_laboratorio.png\n"); return -1; }
+    if (!lab_chao) { printf("Erro: chao_laboratorio.png\n"); return -1; }
+    if (!lab_chao2) { printf("Erro: chao_laboratorio2.png\n"); return -1; }
+
+    Tema tema_pedra = { tile_parede, tile_porta, tile_porta_saida, NULL, NULL, NULL, NULL };
+    Tema tema_biblioteca = { esc_parede, esc_porta, NULL, esc_chao, esc_estante, esc_quadro, NULL };
+    Tema tema_laboratorio = { lab_parede, lab_porta, lab_porta_saida, lab_chao, lab_bancada, NULL, lab_chao2 };
 
     bool tem_professor = (prof_sprites != NULL);
     int prof_quadro_w = 1;
@@ -1383,7 +1457,13 @@ int main()
             redesenhando = false;
 
             al_clear_to_color(al_map_rgb(20, 20, 20));
-            const Tema* tema_atual = (mapas[mapa_atual].tema == TEMA_BIBLIOTECA) ? &tema_biblioteca : &tema_pedra;
+
+            const Tema* tema_atual = &tema_pedra;
+            if (mapas[mapa_atual].tema == TEMA_BIBLIOTECA)
+                tema_atual = &tema_biblioteca;
+            else if (mapas[mapa_atual].tema == TEMA_LABORATORIO)
+                tema_atual = &tema_laboratorio;
+
             desenhar_mapa(camera_x, camera_y, tema_atual);
 
             if (tem_professor)
@@ -1451,7 +1531,10 @@ int main()
                 al_draw_text(fonte, al_map_rgb(255, 160, 60), 640, 45, ALLEGRO_ALIGN_CENTER, "O TEMPO ACABOU! As portas foram fechadas e a fase recomecou.");
 
             if (aviso_mapa > 0)
-                al_draw_text(fonte, al_map_rgb(120, 220, 255), 640, 70, ALLEGRO_ALIGN_CENTER, "MAPA 2 - BIBLIOTECA");
+            {
+                const char* nome_mapa = (mapa_atual == 1) ? "MAPA 2 - BIBLIOTECA" : "MAPA 3 - LABORATORIO";
+                al_draw_text(fonte, al_map_rgb(120, 220, 255), 640, 70, ALLEGRO_ALIGN_CENTER, nome_mapa);
+            }
 
             if (conversando && !perguntando)
             {
@@ -1476,7 +1559,12 @@ int main()
 
                 al_draw_text(fonte, al_map_rgb(255, 255, 255), 640, 170, ALLEGRO_ALIGN_CENTER, "PORTA BLOQUEADA - RESOLVA A EQUACAO");
                 al_draw_text(fonte, al_map_rgb(255, 255, 0), 640, 205, ALLEGRO_ALIGN_CENTER, perguntas[mapa_atual][pergunta_atual].enunciado);
-                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, (mapa_atual == 0) ? "Qual o valor de x?" : "Qual o resultado?");
+
+                const char* subtitulo = "Qual o resultado?";
+                if (mapa_atual == 0)
+                    subtitulo = "Qual o valor de x?";
+
+                al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, subtitulo);
 
                 al_draw_filled_rectangle(380, 240, 900, 280, al_map_rgb(15, 15, 20));
                 al_draw_rectangle(380, 240, 900, 280, al_map_rgb(180, 180, 180), 2);
@@ -1532,6 +1620,12 @@ int main()
     if (tile_porta_saida != NULL)
         al_destroy_bitmap(tile_porta_saida);
 
+    al_destroy_bitmap(lab_chao2);
+    al_destroy_bitmap(lab_chao);
+    al_destroy_bitmap(lab_porta_saida);
+    al_destroy_bitmap(lab_porta);
+    al_destroy_bitmap(lab_bancada);
+    al_destroy_bitmap(lab_parede);
     al_destroy_bitmap(esc_quadro);
     al_destroy_bitmap(esc_estante);
     al_destroy_bitmap(esc_chao);
