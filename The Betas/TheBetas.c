@@ -94,13 +94,13 @@ Pergunta perguntas[QTD_MAPAS][QTD_PERGUNTAS] = {
     { "2x^2 - 5x + 1 para x = -2", 19 },
     { "x^2 + 4x - 12 para x = 3", 9 } },
 {
-    { "x^2 - 5x + 6 = 0  (maior raiz)", 3 },
-    { "x^2 - 7x + 12 = 0  (maior raiz)", 4 },
-    { "x^2 - x - 6 = 0  (maior raiz)", 3 },
-    { "2x^2 - 8 = 0  (maior raiz)", 2 },
-    { "x^2 + 2x - 15 = 0  (maior raiz)", 3 },
-    { "x^2 - 9x + 20 = 0  (maior raiz)", 5 },
-    { "2x^2 - 3x - 2 = 0  (maior raiz)", 2 } } };
+    { "25% de 200", 50 },
+    { "40% de 50", 20 },
+    { "Produto de 80 reais com aumento de 25%: novo preco?", 100 },
+    { "Camisa de 120 reais com desconto de 15%: preco final?", 102 },
+    { "log base 2 de 32", 5 },
+    { "log base 3 de 81", 4 },
+    { "log base 10 de 1000", 3 } } };
 
 char falas[QTD_MAPAS][QTD_FALAS][200] = {
 {
@@ -124,15 +124,15 @@ char falas[QTD_MAPAS][QTD_FALAS][200] = {
     "Com x negativo, use parenteses! Ex: y = 2x^2 - 5x + 1 para x = -2 -> 2(-2)^2 - 5(-2) + 1 = 2(4) + 10 + 1 = 19. Lembre: (-2)^2 = 4.",
     "Dica final: va com calma, faca a conta passo a passo e confira os sinais. Se a porta pedir o delta, use b^2 - 4ac. Se pedir para substituir, troque o x. Boa sorte!" },
 {
-    "Bem-vindo ao laboratorio! Aqui as portas pedem a maior raiz de uma equacao do 2o grau. Eu te ajudo a chegar la.",
-    "Lembre: ax^2 + bx + c = 0. Primeiro ache a, b e c, cuidando dos sinais. Ex: x^2 - 5x + 6 = 0 tem a = 1, b = -5, c = 6.",
-    "Calcule o delta: delta = b^2 - 4ac. Ex: (-5)^2 - 4(1)(6) = 25 - 24 = 1.",
-    "Formula de Bhaskara: x = (-b +- raiz(delta)) / (2a). O sinal + da a maior raiz quando a e positivo.",
-    "Ex: x = (5 +- 1) / 2. Entao x = 6/2 = 3 ou x = 4/2 = 2. A maior raiz e 3.",
-    "Cuidado: -b com b negativo vira positivo! Se b = -7, entao -b = 7.",
-    "Se nao tem termo em x, como 2x^2 - 8 = 0, isole: x^2 = 4, entao x = 2 ou x = -2. A maior e 2.",
-    "Ex: 2x^2 - 3x - 2 = 0. Delta = 9 + 16 = 25. x = (3 +- 5) / 4: x = 2 ou x = -1/2. A maior raiz e 2.",
-    "Dica final: confira substituindo a raiz na equacao. Se der 0, voce acertou! Boa sorte!" } };
+    "Bem-vindo ao laboratorio! Aqui as portas misturam dois assuntos: porcentagem e logaritmo. Vou te ensinar os dois, comecando pela porcentagem.",
+    "Porcentagem significa 'por cem'. 25% e o mesmo que 25/100 = 0,25. Para achar uma porcentagem de um numero, multiplique. Ex: 25% de 200 = 0,25 x 200 = 50.",
+    "Truque de cabeca: 10% e dividir por 10, 50% e a metade, 25% e a metade da metade. Ex: 40% de 50 -> 10% de 50 = 5, entao 40% = 4 x 5 = 20.",
+    "Aumento: calcule a porcentagem e SOME. Ex: 80 com aumento de 25%: 25% de 80 = 20, entao 80 + 20 = 100.",
+    "Desconto: calcule a porcentagem e SUBTRAIA. Ex: 120 com desconto de 15%: 10% = 12, 5% = 6, 15% = 18. Preco final: 120 - 18 = 102.",
+    "Agora o logaritmo! log base a de b e o expoente que voce poe no a para chegar no b. Ex: log base 2 de 8 = 3, porque 2^3 = 8.",
+    "Para resolver, pergunte: a que numero devo elevar a base para chegar la? Ex: log base 10 de 1000 = 3, porque 10 x 10 x 10 = 1000.",
+    "Mais um: log base 3 de 81. Faca as potencias de 3: 3, 9, 27, 81. Sao 4 passos, entao o logaritmo e 4. Para log base 2 de 32: 2, 4, 8, 16, 32 -> 5.",
+    "Dica final: porcentagem de aumento soma, desconto subtrai. No log, a base e o numero que voce multiplica por ele mesmo. Conte os passos! Boa sorte!" } };
 
 int mapa1[LINHAS][COLUNAS] = {
     { 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1 },
@@ -210,7 +210,7 @@ int mapa3[LINHAS][COLUNAS] = {
     { 1,0,1,0,1,0,3,0,1,1,1,0,3,0,1,1,1,1,1,0,1,0,1,0,1,0,1,0,3,1,1,1,1,0,1 },
     { 1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,1 },
     { 1,0,1,0,1,0,1,1,1,0,1,1,1,1,3,0,1,0,1,3,3,1,1,0,1,0,1,3,1,1,1,0,1,0,1 },
-    { 1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,0,0,1 },
+    { 1,0,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,0,0,1,0,2,0,1 },
     { 1,0,1,1,1,1,3,1,1,0,1,0,1,1,1,1,1,2,1,0,3,0,1,0,1,0,1,0,1,0,1,3,3,0,1 },
     { 1,0,1,0,0,0,0,0,0,0,1,0,1,0,0,0,1,0,1,0,0,0,1,0,1,0,1,0,1,0,0,0,0,0,1 },
     { 1,0,3,0,1,3,1,1,1,0,1,0,1,0,1,1,1,0,1,3,3,0,1,0,3,1,3,2,1,3,1,0,3,0,1 },
@@ -1563,8 +1563,6 @@ int main()
                 const char* subtitulo = "Qual o resultado?";
                 if (mapa_atual == 0)
                     subtitulo = "Qual o valor de x?";
-                else if (mapa_atual == 2)
-                    subtitulo = "Qual a maior raiz?";
 
                 al_draw_text(fonte, al_map_rgb(200, 200, 200), 640, 225, ALLEGRO_ALIGN_CENTER, subtitulo);
 
