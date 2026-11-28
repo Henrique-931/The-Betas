@@ -1669,5 +1669,5 @@ int main()
     al_destroy_display(display);
     al_destroy_event_queue(evento);
 
-    return 0;
+     return 0;
 }
